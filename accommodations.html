@@ -1,1 +1,96 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Accommodations - Gonah Homes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Tile Navigation (same as index.html) -->
+  <nav class="tile-nav">
+    <div class="tile-nav-container">
+      <a href="index.html" class="tile-nav-logo">Gonah Homes</a>
+      <div class="tile-nav-tiles">
+        <div class="tile-nav-tile"><a href="index.html"><span class="tile-icon">&#127968;</span><span class="tile-label">Home</span></a></div>
+        <div class="tile-nav-tile dropdown">
+          <span class="tile-icon">&#127969;</span><span class="tile-label">Accommodation</span>
+          <div class="tile-dropdown-content">
+            <a href="#studio">Studio</a>
+            <a href="#onebed">One-Bedroom</a>
+            <a href="#twobed">Two-Bedroom</a>
+            <a href="#threebed">Three-Bedroom</a>
+            <a href="#fourbed">Four-Bedroom</a>
+            <a href="#maisonette">Maisonette</a>
+          </div>
+        </div>
+        <div class="tile-nav-tile"><a href="policies.html"><span class="tile-icon">&#128209;</span><span class="tile-label">Policies</span></a></div>
+        <div class="tile-nav-tile"><a href="reviews.html"><span class="tile-icon">&#11088;</span><span class="tile-label">Reviews</span></a></div>
+        <div class="tile-nav-tile"><a href="recommendations.html"><span class="tile-icon">&#128205;</span><span class="tile-label">Local Tips</span></a></div>
+        <div class="tile-nav-tile"><a href="contact.html"><span class="tile-icon">&#9993;</span><span class="tile-label">Contact</span></a></div>
+        <div class="tile-nav-tile"><a href="blog.html"><span class="tile-icon">&#128221;</span><span class="tile-label">Blog</span></a></div>
+      </div>
+    </div>
+  </nav>
+  <div class="content">
+    <h1>Our Accommodations</h1>
+    <div id="studio">
+      <h2>Studio Apartment</h2>
+      <p>Cozy and modern, perfect for solo travelers or couples. All essentials included.</p>
+      <button class="button book-btn" data-house="Studio Apartment">Book Studio</button>
+    </div>
+    <hr>
+    <div id="onebed">
+      <h2>One-Bedroom Apartment</h2>
+      <p>Spacious for singles or couples seeking comfort and privacy.</p>
+      <button class="button book-btn" data-house="One-Bedroom Apartment">Book One-Bedroom</button>
+    </div>
+    <hr>
+    <div id="twobed">
+      <h2>Two-Bedroom Apartment</h2>
+      <p>Ideal for small families or friends traveling together.</p>
+      <button class="button book-btn" data-house="Two-Bedroom Apartment">Book Two-Bedroom</button>
+    </div>
+    <hr>
+    <div id="threebed">
+      <h2>Three-Bedroom Apartment</h2>
+      <p>Perfect for bigger families or a group. Lots of space, modern amenities.</p>
+      <button class="button book-btn" data-house="Three-Bedroom Apartment">Book Three-Bedroom</button>
+    </div>
+    <hr>
+    <div id="fourbed">
+      <h2>Four-Bedroom Apartment</h2>
+      <p>The ultimate family or group option for a memorable stay.</p>
+      <button class="button book-btn" data-house="Four-Bedroom Apartment">Book Four-Bedroom</button>
+    </div>
+    <hr>
+    <div id="maisonette">
+      <h2>Maisonette</h2>
+      <p>Luxury and privacy combined. Unique multi-level living experience.</p>
+      <button class="button book-btn" data-house="Maisonette">Book Maisonette</button>
+    </div>
+  </div>
+  <!-- Booking Modal -->
+  <div id="booking-modal-bg" class="booking-modal-bg">
+    <div class="booking-modal">
+      <button class="close-modal" title="Close Modal">&times;</button>
+      <form id="booking-form">
+        <h3>Book Accommodation</h3>
+        <input type="hidden" id="booking-house" name="house" value="">
+        <label for="booking-name">Your Name</label>
+        <input type="text" id="booking-name" name="name" required>
+        <label for="booking-guests">Number of Guests</label>
+        <input type="number" id="booking-guests" name="guests" min="1" required>
+        <label for="booking-dates">Booking Dates</label>
+        <input type="text" id="booking-dates" name="dates" placeholder="e.g. 5th June - 9th June" required>
+        <button type="submit" class="button">Complete Booking</button>
+      </form>
+      <div id="booking-confirm"></div>
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2025 Gonah Homes. All rights reserved.
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
