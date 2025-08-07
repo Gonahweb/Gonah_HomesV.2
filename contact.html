@@ -1,1 +1,134 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact | Gonah Homes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: #fffbe9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #222;
+    }
+    .container {
+      max-width: 640px;
+      margin: 3em auto 2em auto;
+      padding: 0 1em;
+    }
+    .glassy-section {
+      background: rgba(34,34,34,0.74);
+      border-radius: 25px;
+      box-shadow: 0 8px 32px 0 rgba(128,0,0,0.13), 0 1.5px 0 #80000044;
+      border-left: 8px solid #800000;
+      backdrop-filter: blur(13px) saturate(120%);
+      -webkit-backdrop-filter: blur(13px) saturate(120%);
+      padding: 2.2em 1.5em 1.3em 1.5em;
+      color: #fffbe9;
+    }
+    h1, h2 {
+      color: #FFD600;
+      margin-top: 0;
+    }
+    .contact-detail {
+      margin-bottom: 1.2em;
+      color: #fffbe9;
+    }
+    .contact-detail b {
+      color: #FFD600;
+    }
+    .contact-form {
+      margin-top: 2em;
+      background: rgba(255,255,255,0.10);
+      border-left: 5px solid #800000;
+      border-radius: 14px;
+      padding: 1.4em 1em 1em 1em;
+      box-shadow: 0 2px 12px #80000013;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      color: #232323;
+    }
+    .contact-form label { font-weight: 500; color: #800000;}
+    .contact-form input, .contact-form textarea {
+      width: 100%;
+      font-size: 1em;
+      box-sizing: border-box;
+      margin-bottom: 0.6em;
+      padding: 0.5em 0.7em;
+      border-radius: 7px;
+      border: 1px solid #FFD600;
+      background: #fffbe9;
+      font-family: inherit;
+    }
+    .contact-form textarea { min-height: 60px; max-height: 110px; resize: vertical;}
+    .contact-form button {
+      background: #800000;
+      color: #FFD600;
+      border-radius: 7px;
+      font-weight: bold;
+      border: none;
+      padding: 0.5em 1.2em;
+      transition: background 0.18s, color 0.18s;
+      cursor: pointer;
+      align-self: flex-end;
+      box-shadow: 0 2px 8px #ffd60023;
+    }
+    .contact-form button:hover { background: #FFD600; color: #800000; }
+    .form-message {
+      margin-top: 0.7em;
+      color: #FFD600;
+      font-weight: bold;
+    }
+    a.back-link {
+      color: #FFD600;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 1.5em;
+      font-size: 1.07em;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: #800000; }
+    @media (max-width: 600px) {
+      .container { max-width: 97vw; }
+      .glassy-section { padding: 1.1em 0.7em 0.7em 0.9em; }
+      .contact-form { padding: 0.9em 0.4em 0.7em 0.6em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="index.html">&larr; Back to Home</a>
+    <div class="glassy-section">
+      <h1>Contact Us</h1>
+      <div class="contact-detail">
+        <b>Phone/WhatsApp:</b> <a href="tel:+254799466723" style="color:#FFD600;">+254 799 466 723</a><br>
+        <b>Email:</b> <a href="mailto:gonahhomes@gmail.com" style="color:#FFD600;">gonahhomes@gmail.com</a><br>
+        <b>Location:</b> Mombasa, Kenya
+      </div>
+      <form class="contact-form" id="contact-form">
+        <label for="cf-name">Your Name</label>
+        <input type="text" id="cf-name" name="cf-name" required>
+        <label for="cf-email">Your Email</label>
+        <input type="email" id="cf-email" name="cf-email" required>
+        <label for="cf-message">Message</label>
+        <textarea id="cf-message" name="cf-message" required placeholder="How can we help you?"></textarea>
+        <button type="submit">Send Message</button>
+        <div class="form-message" id="cf-message-area"></div>
+      </form>
+    </div>
+  </div>
+  <script>
+    // Simple contact form feedback (does NOT actually send email)
+    const cf = document.getElementById('contact-form');
+    const cfMsg = document.getElementById('cf-message-area');
+    cf.onsubmit = function(ev) {
+      ev.preventDefault();
+      cfMsg.textContent = "Thank you for your message! We will get back to you soon.";
+      cf.reset();
+    }
+  </script>
+</body>
+</html>
