@@ -1,1 +1,82 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Local Recommendations | Gonah Homes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: #fffbe9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #222;
+    }
+    .container {
+      max-width: 640px;
+      margin: 3em auto 2em auto;
+      padding: 0 1em;
+    }
+    .glassy-section {
+      background: rgba(34,34,34,0.74);
+      border-radius: 25px;
+      box-shadow: 0 8px 32px 0 rgba(128,0,0,0.13), 0 1.5px 0 #80000044;
+      border-left: 8px solid #800000;
+      backdrop-filter: blur(13px) saturate(120%);
+      -webkit-backdrop-filter: blur(13px) saturate(120%);
+      padding: 2.2em 1.5em 1.3em 1.5em;
+      color: #fffbe9;
+    }
+    h1, h2 {
+      color: #FFD600;
+      margin-top: 0;
+    }
+    ul, li { color: #fffbe9; }
+    a.back-link {
+      color: #FFD600;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 1.5em;
+      font-size: 1.07em;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: #800000; }
+    @media (max-width: 600px) {
+      .container { max-width: 97vw; }
+      .glassy-section { padding: 1.1em 0.7em 0.7em 0.9em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="index.html">&larr; Back to Home</a>
+    <div class="glassy-section">
+      <h1>Local Recommendations</h1>
+      <h2>Restaurants &amp; Cafés</h2>
+      <ul>
+        <li><b>Tamarind Dhow:</b> Iconic seafood and local cuisine on a floating restaurant.</li>
+        <li><b>Cafe Mocha:</b> Best for breakfast and coffee in Nyali.</li>
+        <li><b>Barka Restaurant:</b> Delicious Swahili dishes in Old Town.</li>
+      </ul>
+      <h2>Attractions &amp; Activities</h2>
+      <ul>
+        <li><b>Fort Jesus:</b> Historic fort and museum, UNESCO World Heritage Site.</li>
+        <li><b>Haller Park:</b> Nature park, animals, walking trails.</li>
+        <li><b>Mombasa Marine Park:</b> Snorkeling, boat rides, marine life.</li>
+        <li><b>North &amp; South Coast Beaches:</b> Relax, swim, or take a boat tour.</li>
+      </ul>
+      <h2>Shopping</h2>
+      <ul>
+        <li><b>City Mall:</b> Modern shopping, food court, cinema in Nyali.</li>
+        <li><b>Old Town Markets:</b> Souvenirs, spices, local crafts.</li>
+      </ul>
+      <h2>Transport</h2>
+      <ul>
+        <li>Use Bolt, Uber, or tuk-tuks for convenient travel</li>
+        <li>Ask us for private driver/tour recommendations!</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
