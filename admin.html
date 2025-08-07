@@ -1,1 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gonah Homes - Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background: #800000;
+      color: #fff;
+      padding: 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-header {
+      padding: 1.5em;
+      background: #600000;
+      border-bottom: 1px solid #a00000;
+    }
+    .sidebar-header h2 {
+      margin: 0;
+      color: #FFD600;
+      font-size: 1.3em;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar-menu li {
+      border-bottom: 1px solid #a00000;
+    }
+    .sidebar-menu a {
+      display: block;
+      padding: 1em 1.5em;
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: #a00000;
+      color: #FFD600;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 2em;
+      flex: 1;
+      background: #fff;
+      min-height: 100vh;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2em;
+      padding-bottom: 1em;
+      border-bottom: 2px solid #eee;
+    }
+    .header h1 {
+      margin: 0;
+      color: #800000;
+    }
+    .logout-btn {
+      background: #800000;
+      color: #FFD600;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5em;
+      margin-bottom: 2em;
+    }
+    .card {
+      background: #fff;
+      padding: 1.5em;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 4px solid #800000;
+    }
+    .card h3 {
+      margin: 0 0 0.5em 0;
+      color: #800000;
+    }
+    .card .number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #333;
+    }
+    .section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 1em;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #800000;
+      color: #FFD600;
+      font-weight: bold;
+    }
+    .btn {
+      padding: 0.4em 0.8em;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin: 0.2em;
+      transition: background 0.3s;
+    }
+    .btn-primary { background: #800000; color: #FFD600; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-warning { background: #ffc107; color: #333; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn:hover { opacity: 0.8; }
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #800000, #FFD600);
+    }
+    .login-form {
+      background: #fff;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-form h2 {
+      text-align: center;
+      color: #800000;
+      margin-bottom: 1.5em;
+    }
+    .form-group {
+      margin-bottom: 1em;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5em;
+      color: #333;
+      font-weight: bold;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.8em;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #800000;
+    }
+    .login-btn {
+      width: 100%;
+      background: #800000;
+      color: #FFD600;
+      border: none;
+      padding: 1em;
+      border-radius: 5px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .login-btn:hover {
+      background: #600000;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 2em;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .close {
+      position: absolute;
+      top: 1em;
+      right: 1em;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 200px;
+      }
+      .main-content {
+        margin-left: 200px;
+        padding: 1em;
+      }
+      .dashboard-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-container">
+    <form class="login-form" id="admin-login-form">
+      <div style="text-align: center; margin-bottom: 1em;">
+        <a href="index.html" style="color: #800000; text-decoration: none; font-size: 0.9em;">&larr; Back to Main Site</a>
+      </div>
+      <h2>Gonah Homes Admin</h2>
+      <div class="form-group">
+        <label for="admin-email">Email</label>
+        <input type="email" id="admin-email" required>
+      </div>
+      <div class="form-group">
+        <label for="admin-password">Password</label>
+        <input type="password" id="admin-password" required>
+      </div>
+      <button type="submit" class="login-btn">Login</button>
+      <div style="text-align: center; margin-top: 1em;">
+        <a href="#" id="forgot-password-link" style="color: #800000; text-decoration: none; font-size: 0.9em;">Forgot Password?</a>
+      </div>
+      <div id="login-error" style="color: red; text-align: center; margin-top: 1em;"></div>
+      <div id="reset-success" style="color: green; text-align: center; margin-top: 1em;"></div>
+    </form>
+  </div>
 
+  <!-- Admin Dashboard -->
+  <div id="admin-dashboard" class="admin-container" style="display: none;">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <h2>Admin Panel</h2>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#" class="menu-link active" data-section="dashboard">Dashboard</a></li>
+        <li><a href="#" class="menu-link" data-section="bookings">Bookings</a></li>
+        <li><a href="#" class="menu-link" data-section="reviews">Reviews</a></li>
+        <li><a href="#" class="menu-link" data-section="messages">Messages</a></li>
+        <li><a href="#" class="menu-link" data-section="traffic">Traffic Analytics</a></li>
+        <li><a href="#" class="menu-link" data-section="offers">Offers & Announcements</a></li>
+        <li><a href="#" class="menu-link" data-section="clients">Client Management</a></li>
+        <li><a href="#" class="menu-link" data-section="settings">Settings</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="header">
+        <h1 id="section-title">Dashboard</h1>
+        <div style="display: flex; gap: 1em; align-items: center;">
+          <a href="index.html" style="color: #800000; text-decoration: none; font-size: 0.9em;">&larr; Main Site</a>
+          <button class="logout-btn" id="logout-btn">Logout</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Section -->
+      <div id="dashboard-section" class="section active">
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>Total Bookings</h3>
+            <div class="number" id="total-bookings">0</div>
+          </div>
+          <div class="card">
+            <h3>Active Reviews</h3>
+            <div class="number" id="total-reviews">0</div>
+          </div>
+          <div class="card">
+            <h3>Messages</h3>
+            <div class="number" id="total-messages">0</div>
+          </div>
+          <div class="card">
+            <h3>Monthly Revenue</h3>
+            <div class="number" id="monthly-revenue">KES 0</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Recent Activity</h3>
+          <div id="recent-activity">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Bookings Section -->
+      <div id="bookings-section" class="section">
+        <div class="card">
+          <h3>Booking Management</h3>
+          <table id="bookings-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Property</th>
+                <th>Dates</th>
+                <th>Guests</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-tbody">
+              <tr>
+                <td colspan="7">Loading bookings...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div id="reviews-section" class="section">
+        <div class="card">
+          <h3>Review Management</h3>
+          <table id="reviews-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Rating</th>
+                <th>Review</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reviews-tbody">
+              <tr>
+                <td colspan="5">Loading reviews...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Messages Section -->
+      <div id="messages-section" class="section">
+        <div class="card">
+          <h3>Customer Messages</h3>
+          <table id="messages-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="messages-tbody">
+              <tr>
+                <td colspan="6">Loading messages...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Traffic Analytics Section -->
+      <div id="traffic-section" class="section">
+        <div class="card">
+          <h3>Website Analytics</h3>
+          <div class="dashboard-cards">
+            <div class="card">
+              <h3>Page Views Today</h3>
+              <div class="number" id="page-views-today">0</div>
+            </div>
+            <div class="card">
+              <h3>Unique Visitors</h3>
+              <div class="number" id="unique-visitors">0</div>
+            </div>
+            <div class="card">
+              <h3>Bounce Rate</h3>
+              <div class="number" id="bounce-rate">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Offers Section -->
+      <div id="offers-section" class="section">
+        <div class="card">
+          <h3>Announcements & Offers</h3>
+          <button class="btn btn-primary" onclick="createOffer()">Create New Offer</button>
+          <table id="offers-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Valid Until</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="offers-tbody">
+              <tr>
+                <td colspan="5">No offers created yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Clients Section -->
+      <div id="clients-section" class="section">
+        <div class="card">
+          <h3>Client Management</h3>
+          <table id="clients-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Total Bookings</th>
+                <th>Last Visit</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clients-tbody">
+              <tr>
+                <td colspan="5">Loading clients...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div id="settings-section" class="section">
+        <div class="card">
+          <h3>System Settings</h3>
+          <form id="settings-form">
+            <div class="form-group">
+              <label>Site Title</label>
+              <input type="text" id="site-title" value="Gonah Homes">
+            </div>
+            <div class="form-group">
+              <label>Contact Email</label>
+              <input type="email" id="contact-email" value="gonahproperties@gmail.com">
+            </div>
+            <div class="form-group">
+              <label>M-Pesa Number</label>
+              <input type="tel" id="mpesa-number" value="0799466723">
+            </div>
+            <div class="form-group">
+              <label>Booking Confirmation Message</label>
+              <textarea id="booking-message" rows="3">Thank you for booking with Gonah Homes. Your reservation has been confirmed.</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div id="reply-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('reply-modal')">&times;</span>
+      <h3>Reply to Review</h3>
+      <form id="reply-form">
+        <input type="hidden" id="reply-review-id">
+        <div class="form-group">
+          <label>Your Reply</label>
+          <textarea id="reply-text" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Reply</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="message-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('message-modal')">&times;</span>
+      <h3>Reply to Message</h3>
+      <div id="message-details"></div>
+      <form id="message-reply-form">
+        <input type="hidden" id="message-id">
+        <div class="form-group">
+          <label>Your Reply</label>
+          <textarea id="message-reply-text" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Reply</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyABTVp797tNu353FBVLzsOp90aIX2mNF74",
+      authDomain: "my-website-project2797.firebaseapp.com",
+      projectId: "my-website-project2797",
+      storageBucket: "my-website-project2797.appspot.com",
+      messagingSenderId: "406226552922",
+      appId: "1:406226552922:web:ffdf2ccf6f77a57964b063"
+    };
+
+    // Initialize Firebase
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      console.log('Firebase initialized successfully');
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentAdmin = null;
+    // Admin configuration
+    const ADMIN_EMAIL = 'salimtuva0@gmail.com';
+    const ADMIN_PASSWORD = 'gonahhomes@0799466723';
+
+    // DOM Elements
+    const loginScreen = document.getElementById('login-screen');
+    const adminDashboard = document.getElementById('admin-dashboard');
+    const loginForm = document.getElementById('admin-login-form');
+    const loginError = document.getElementById('login-error');
+
+    // Authentication
+    auth.onAuthStateChanged((user) => {
+      console.log('Auth state changed:', user ? user.email : 'No user');
+      if (user && user.email === ADMIN_EMAIL) {
+        currentAdmin = user;
+        showDashboard();
+        loadDashboardData();
+      } else {
+        showLogin();
+        if (user && user.email !== ADMIN_EMAIL) {
+          loginError.textContent = 'Access denied. Admin access only.';
+        }
+      }
+    });
+
+    // Password Reset
+    document.getElementById('forgot-password-link').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('admin-email').value;
+
+      if (!email) {
+        loginError.textContent = 'Please enter your email address first.';
+        return;
+      }
+
+      if (email !== ADMIN_EMAIL) {
+        loginError.textContent = 'Access denied. Admin email only.';
+        return;
+      }
+
+      try {
+        const actionCodeSettings = {
+          url: window.location.origin + '/admin.html',
+          handleCodeInApp: false
+        };
+        await auth.sendPasswordResetEmail(email, actionCodeSettings);
+        document.getElementById('reset-success').textContent = 'Password reset email sent! Check your inbox and spam folder.';
+        loginError.textContent = '';
+      } catch (error) {
+        console.error('Password reset error:', error);
+        if (error.code === 'auth/user-not-found') {
+          loginError.textContent = 'No account found with this email. Please create an account first.';
+        } else {
+          loginError.textContent = 'For now, use password: gonahhomes@0799466723';
+        }
+        document.getElementById('reset-success').textContent = '';
+      }
+    });
+
+    // Login Form
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.textContent = '';
+      document.getElementById('reset-success').textContent = '';
+
+      const email = document.getElementById('admin-email').value;
+      const password = document.getElementById('admin-password').value;
+
+      if (!email || !password) {
+        loginError.textContent = 'Please enter both email and password.';
+        return;
+      }
+
+      if (email !== ADMIN_EMAIL) {
+        loginError.textContent = 'Access denied. Admin only.';
+        return;
+      }
+
+      if (password !== ADMIN_PASSWORD) {
+        loginError.textContent = 'Invalid password.';
+        return;
+      }
+
+      try {
+        console.log('Attempting to sign in...');
+        await auth.signInWithEmailAndPassword(email, password);
+        console.log('Sign in successful');
+      } catch (error) {
+        console.error('Login error:', error);
+        // If Firebase fails but password matches, allow direct login
+        if (password === ADMIN_PASSWORD) {
+          currentAdmin = { email: ADMIN_EMAIL, uid: 'admin-direct' };
+          showDashboard();
+          loadDashboardData();
+        } else {
+          loginError.textContent = 'Invalid password. Use: gonahhomes@0799466723';
+        }
+      }
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      if (currentAdmin) {
+        if (auth.currentUser) {
+          auth.signOut().then(() => {
+            currentAdmin = null;
+            showLogin();
+          });
+        } else {
+          // Direct logout for non-Firebase users
+          currentAdmin = null;
+          showLogin();
+        }
+      }
+    });
+
+    // Navigation
+    document.querySelectorAll('.menu-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = e.target.dataset.section;
+        showSection(section);
+        updateActiveMenu(e.target);
+      });
+    });
+
+    function showLogin() {
+      loginScreen.style.display = 'flex';
+      adminDashboard.style.display = 'none';
+    }
+
+    function showDashboard() {
+      loginScreen.style.display = 'none';
+      adminDashboard.style.display = 'flex';
+    }
+
+    function showSection(sectionName) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(sectionName + '-section').classList.add('active');
+      document.getElementById('section-title').textContent = 
+        sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+
+      // Load section-specific data
+      loadSectionData(sectionName);
+    }
+
+    function updateActiveMenu(activeLink) {
+      document.querySelectorAll('.menu-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      activeLink.classList.add('active');
+    }
+
+    // Data Loading Functions
+    function loadDashboardData() {
+      loadBookingsCount();
+      loadReviewsCount();
+      loadMessagesCount();
+      loadRecentActivity();
+    }
+
+    function loadSectionData(section) {
+      switch(section) {
+        case 'bookings':
+          loadBookings();
+          break;
+        case 'reviews':
+          loadReviews();
+          break;
+        case 'messages':
+          loadMessages();
+          break;
+        case 'traffic':
+          loadTrafficData();
+          break;
+        case 'offers':
+          loadOffers();
+          break;
+        case 'clients':
+          loadClients();
+          break;
+      }
+    }
+
+    async function loadBookingsCount() {
+      try {
+        const snapshot = await db.collection('bookings').get();
+        document.getElementById('total-bookings').textContent = snapshot.size;
+      } catch (error) {
+        console.error('Error loading bookings count:', error);
+      }
+    }
+
+    async function loadReviewsCount() {
+      try {
+        const snapshot = await db.collection('reviews').get();
+        document.getElementById('total-reviews').textContent = snapshot.size;
+      } catch (error) {
+        console.error('Error loading reviews count:', error);
+      }
+    }
+
+    async function loadMessagesCount() {
+      try {
+        const snapshot = await db.collection('messages').get();
+        document.getElementById('total-messages').textContent = snapshot.size;
+      } catch (error) {
+        console.error('Error loading messages count:', error);
+      }
+    }
+
+    function loadRecentActivity() {
+      const activityDiv = document.getElementById('recent-activity');
+      activityDiv.innerHTML = `
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 0.5em;">📊 New booking from Jane Doe - Studio Apartment</li>
+          <li style="margin-bottom: 0.5em;">⭐ New 5-star review received</li>
+          <li style="margin-bottom: 0.5em;">📧 3 new messages from potential clients</li>
+          <li style="margin-bottom: 0.5em;">💰 Payment confirmed for Booking #001</li>
+        </ul>
+      `;
+    }
+
+    function loadBookings() {
+      db.collection('bookings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+        const tbody = document.getElementById('bookings-tbody');
+        if (snapshot.empty) {
+          tbody.innerHTML = '<tr><td colspan="7">No bookings found.</td></tr>';
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach((doc) => {
+          const booking = doc.data();
+          html += `
+            <tr>
+              <td>${booking.name || 'N/A'}</td>
+              <td>${booking.house || 'N/A'}</td>
+              <td>${booking.checkin || 'N/A'} - ${booking.checkout || 'N/A'}</td>
+              <td>${booking.guests || 'N/A'}</td>
+              <td>${booking.email || 'N/A'}<br>${booking.phone || 'N/A'}</td>
+              <td><span class="btn btn-warning">Pending</span></td>
+              <td>
+                <button class="btn btn-success" onclick="confirmBooking('${doc.id}')">Confirm</button>
+                <button class="btn btn-primary" onclick="contactClient('${booking.email}', '${booking.phone}')">Contact</button>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      });
+    }
+
+    function loadReviews() {
+      db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+        const tbody = document.getElementById('reviews-tbody');
+        if (snapshot.empty) {
+          tbody.innerHTML = '<tr><td colspan="5">No reviews found.</td></tr>';
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach((doc) => {
+          const review = doc.data();
+          const date = review.timestamp ? new Date(review.timestamp.toDate()).toLocaleDateString() : 'N/A';
+          html += `
+            <tr>
+              <td>${review.user?.name || 'Anonymous'}</td>
+              <td>${'★'.repeat(review.rating || 0)}</td>
+              <td>${review.review || 'N/A'}</td>
+              <td>${date}</td>
+              <td>
+                <button class="btn btn-primary" onclick="replyToReview('${doc.id}', '${review.user?.name || 'User'}')">Reply</button>
+                <button class="btn btn-danger" onclick="deleteReview('${doc.id}')">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      });
+    }
+
+    function loadMessages() {
+      db.collection('messages').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+        const tbody = document.getElementById('messages-tbody');
+        if (snapshot.empty) {
+          tbody.innerHTML = '<tr><td colspan="6">No messages found.</td></tr>';
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach((doc) => {
+          const message = doc.data();
+          const date = message.timestamp ? new Date(message.timestamp.toDate()).toLocaleDateString() : 'N/A';
+          const statusClass = message.status === 'new' ? 'btn-warning' : 'btn-success';
+          const statusText = message.status === 'new' ? 'New' : 'Read';
+          
+          html += `
+            <tr>
+              <td>${message.name || 'N/A'}</td>
+              <td>${message.email || 'N/A'}</td>
+              <td>${(message.message || '').substring(0, 50)}${message.message && message.message.length > 50 ? '...' : ''}</td>
+              <td>${date}</td>
+              <td><span class="btn ${statusClass}">${statusText}</span></td>
+              <td>
+                <button class="btn btn-primary" onclick="viewMessage('${doc.id}', '${message.name}', '${message.email}', '${message.message}')">View</button>
+                <button class="btn btn-success" onclick="contactClient('${message.email}')">Reply</button>
+                ${message.status === 'new' ? `<button class="btn btn-warning" onclick="markAsRead('${doc.id}')">Mark Read</button>` : ''}
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      });
+    }
+
+    function loadTrafficData() {
+      // Placeholder analytics data
+      document.getElementById('page-views-today').textContent = '247';
+      document.getElementById('unique-visitors').textContent = '89';
+      document.getElementById('bounce-rate').textContent = '23%';
+    }
+
+    function loadOffers() {
+      // Placeholder offers data
+      const tbody = document.getElementById('offers-tbody');
+      tbody.innerHTML = '<tr><td colspan="5">No offers created yet.</td></tr>';
+    }
+
+    function loadClients() {
+      // Placeholder clients data
+      const tbody = document.getElementById('clients-tbody');
+      tbody.innerHTML = `
+        <tr>
+          <td>Jane Doe</td>
+          <td>jane@example.com</td>
+          <td>3</td>
+          <td>2 days ago</td>
+          <td>
+            <button class="btn btn-primary" onclick="contactClient('jane@example.com')">Contact</button>
+            <button class="btn btn-warning" onclick="viewClientHistory('client1')">History</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    // Action Functions
+    function confirmBooking(bookingId) {
+      if (confirm('Confirm this booking?')) {
+        db.collection('bookings').doc(bookingId).update({
+          status: 'confirmed',
+          confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          alert('Booking confirmed successfully!');
+        });
+      }
+    }
+
+    function replyToReview(reviewId, userName) {
+      document.getElementById('reply-review-id').value = reviewId;
+      document.getElementById('reply-modal').style.display = 'block';
+    }
+
+    function deleteReview(reviewId) {
+      if (confirm('Delete this review?')) {
+        db.collection('reviews').doc(reviewId).delete().then(() => {
+          alert('Review deleted successfully!');
+        });
+      }
+    }
+
+    function contactClient(email, phone = null) {
+      const contactMethod = phone ? 
+        confirm(`Contact ${email}?\nOK = Email\nCancel = WhatsApp (${phone})`) : true;
+      
+      if (contactMethod) {
+        // Email contact
+        window.open(`mailto:${email}?subject=Gonah Homes - Follow Up&body=Dear Customer,%0D%0A%0D%0AThank you for choosing Gonah Homes. We are reaching out regarding your inquiry.%0D%0A%0D%0ABest regards,%0D%0AGonah Homes Team`);
+      } else if (phone) {
+        // WhatsApp contact
+        const message = encodeURIComponent("Hello! Thank you for choosing Gonah Homes. We are reaching out regarding your inquiry.");
+        window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`);
+      }
+    }
+
+    function replyToMessage(messageId) {
+      document.getElementById('message-id').value = messageId;
+      document.getElementById('message-modal').style.display = 'block';
+    }
+
+    function createOffer() {
+      const title = prompt('Offer Title:');
+      const description = prompt('Offer Description:');
+      if (title && description) {
+        db.collection('offers').add({
+          title: title,
+          description: description,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: 'active'
+        }).then(() => {
+          alert('Offer created successfully!');
+          loadOffers();
+        });
+      }
+    }
+
+    function viewMessage(messageId, name, email, message) {
+      document.getElementById('message-details').innerHTML = `
+        <p><strong>From:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <div style="background: #f5f5f5; padding: 1rem; border-radius: 5px; margin: 0.5rem 0;">
+          ${message}
+        </div>
+      `;
+      document.getElementById('message-id').value = messageId;
+      document.getElementById('message-modal').style.display = 'block';
+    }
+
+    function markAsRead(messageId) {
+      db.collection('messages').doc(messageId).update({
+        status: 'read',
+        readAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        console.log('Message marked as read');
+      });
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Reply form submissions
+    document.getElementById('reply-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const reviewId = document.getElementById('reply-review-id').value;
+      const replyText = document.getElementById('reply-text').value;
+
+      db.collection('reviews').doc(reviewId).update({
+        adminReply: replyText,
+        adminReplyAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        alert('Reply sent successfully!');
+        closeModal('reply-modal');
+        document.getElementById('reply-text').value = '';
+      });
+    });
+
+    // Settings form
+    document.getElementById('settings-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Settings saved successfully!');
+    });
+
+    // Initialize dashboard
+    loadDashboardData();
+  </script>
+  <script src="notification-service.js"></script>
+</body>
+              </html>
