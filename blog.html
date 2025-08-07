@@ -1,1 +1,95 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blog | Gonah Homes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: #fffbe9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #222;
+    }
+    .container {
+      max-width: 640px;
+      margin: 3em auto 2em auto;
+      padding: 0 1em;
+    }
+    .glassy-section {
+      background: rgba(34,34,34,0.74);
+      border-radius: 25px;
+      box-shadow: 0 8px 32px 0 rgba(128,0,0,0.13), 0 1.5px 0 #80000044;
+      border-left: 8px solid #800000;
+      backdrop-filter: blur(13px) saturate(120%);
+      -webkit-backdrop-filter: blur(13px) saturate(120%);
+      padding: 2.2em 1.5em 1.3em 1.5em;
+      color: #fffbe9;
+    }
+    h1, h2, h3 {
+      color: #FFD600;
+      margin-top: 0;
+    }
+    .blog-post {
+      margin-bottom: 2em;
+      padding-bottom: 1em;
+      border-bottom: 1px solid #fffbe9;
+    }
+    .blog-post:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    .date {
+      color: #FFD600;
+      font-size: 0.97em;
+      margin-bottom: 0.5em;
+      display: block;
+    }
+    a.back-link {
+      color: #FFD600;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 1.5em;
+      font-size: 1.07em;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: #800000; }
+    @media (max-width: 600px) {
+      .container { max-width: 97vw; }
+      .glassy-section { padding: 1.1em 0.7em 0.7em 0.9em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="index.html">&larr; Back to Home</a>
+    <div class="glassy-section">
+      <h1>Gonah Homes Blog</h1>
+      <div class="blog-post">
+        <h2>Top 5 Things to Do in Mombasa</h2>
+        <span class="date">May 2025</span>
+        <p>
+          From exploring Fort Jesus to relaxing on white sandy beaches, Mombasa offers endless adventures for every traveler. Here are our top picks to make your stay unforgettable!
+        </p>
+      </div>
+      <div class="blog-post">
+        <h2>How to Book Your Perfect Coastal Getaway</h2>
+        <span class="date">April 2025</span>
+        <p>
+          Booking with Gonah Homes is easy and secure. Discover our tips for choosing the right apartment, making payments, and planning your trip.
+        </p>
+      </div>
+      <div class="blog-post">
+        <h2>Swahili Cuisine: What to Try</h2>
+        <span class="date">March 2025</span>
+        <p>
+          Taste the coast! Find out which local delicacies you can’t miss while staying with us.
+        </p>
+      </div>
+      <!-- Add more blog posts as you wish -->
+    </div>
+  </div>
+</body>
+</html>
