@@ -17,6 +17,11 @@ const db = firebase.firestore();
 let currentUser = null;
 const adminEmail = "salimtuva0@gmail.com";
 
+// EmailJS Initialization
+(function () {
+  emailjs.init("z1Isb0xDLyKoaMoSKFw-q"); // Your public key
+})();
+
 // Utility Functions
 function scrollToSection(sectionId) {
   const section = document.getElementById(sectionId);
@@ -230,6 +235,21 @@ function loadReviews() {
   });
 }
 
+// EmailJS Alert Utility
+function showAlert(type, message) {
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `custom-alert alert-${type}`;
+  alertDiv.innerHTML = `
+    <div class="alert-content">
+      <i class="fas fa-${type === 'success' ? 'check-circle' : 'times-circle'}"></i>
+      <span>${message}</span>
+      <button class="alert-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+    </div>
+  `;
+  document.body.appendChild(alertDiv);
+  setTimeout(() => alertDiv.remove(), 5000);
+}
+
 // Form Handlers
 function initFormHandlers() {
   // Email form for reviews
@@ -242,7 +262,7 @@ function initFormHandlers() {
         currentUser = { email: email };
         showUserInfo(email);
       } else {
-        showCustomAlert("Please enter a valid email address", "error");
+        showAlert("error", "Please enter a valid email address");
       }
     });
   }
@@ -263,7 +283,7 @@ function initFormHandlers() {
     reviewForm.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!currentUser) {
-        alert("Please enter your email to leave a review.");
+        showAlert("error", "Please enter your email to leave a review.");
         return;
       }
 
@@ -271,12 +291,12 @@ function initFormHandlers() {
       const reviewText = document.getElementById('review-text').value.trim();
 
       if (!reviewText) {
-        alert("Please write a review!");
+        showAlert("error", "Please write a review!");
         return;
       }
 
       if (!rating) {
-        alert("Please select a rating!");
+        showAlert("error", "Please select a rating!");
         return;
       }
 
@@ -297,10 +317,23 @@ function initFormHandlers() {
         adminReply: null
       };
 
+      // EmailJS Send
+      emailjs.send('Gonah Homes', 'template_p667wcm', {
+        from_name: reviewData.user.name,
+        from_email: reviewData.user.email,
+        message: `Rating: ${rating}\nReview: ${reviewText}`,
+        form_type: "Review"
+      }, 'z1Isb0xDLyKoaMoSKFw-q')
+        .then(() => {
+          showAlert('success', 'Thank you for your review! Email sent successfully.');
+        }, (error) => {
+          showAlert('error', 'Failed to send your review email.');
+        });
+
       db.collection("reviews").add(reviewData).then(() => {
         document.getElementById('review-text').value = '';
         document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
-        showCustomAlert("Thank you for your review! It has been submitted successfully.");
+        showAlert('success', "Thank you for your review! It has been submitted successfully.");
         
         // Send notification to admin
         return db.collection("notifications").add({
@@ -317,7 +350,7 @@ function initFormHandlers() {
         });
       }).catch((error) => {
         console.error("Error adding review: ", error);
-        showCustomAlert("Error submitting review. Please try again.", "error");
+        showAlert('error', "Error submitting review. Please try again.");
       }).finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -342,17 +375,17 @@ function initFormHandlers() {
 
       if (!bookingData.name || !bookingData.guests || !bookingData.checkin || 
           !bookingData.checkout || !bookingData.phone || !bookingData.email) {
-        showCustomAlert("Please fill all required booking fields.", "error");
+        showAlert("error", "Please fill all required booking fields.");
         return;
       }
 
       if (checkinDate < today) {
-        showCustomAlert("Check-in date cannot be in the past.", "error");
+        showAlert("error", "Check-in date cannot be in the past.");
         return;
       }
 
       if (checkoutDate <= checkinDate) {
-        showCustomAlert("Check-out date must be after check-in date.", "error");
+        showAlert("error", "Check-out date must be after check-in date.");
         return;
       }
 
@@ -360,7 +393,7 @@ function initFormHandlers() {
       const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
       const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
       if (daysDiff < 1) {
-        showCustomAlert("Minimum stay is one night.", "error");
+        showAlert("error", "Minimum stay is one night.");
         return;
       }
 
@@ -369,6 +402,29 @@ function initFormHandlers() {
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
       submitBtn.disabled = true;
+
+      // EmailJS Send
+      emailjs.send('Gonah Homes', 'template_p667wcm', {
+        from_name: bookingData.name,
+        from_email: bookingData.email,
+        message: `
+          Booking for: ${bookingData.house}
+          Name: ${bookingData.name}
+          Email: ${bookingData.email}
+          Phone: ${bookingData.phone}
+          Guests: ${bookingData.guests}
+          Check-in: ${bookingData.checkin}
+          Check-out: ${bookingData.checkout}
+          Accessibility: ${bookingData.access}
+          Special Requests: ${bookingData.requests}
+        `,
+        form_type: "Booking"
+      }, 'z1Isb0xDLyKoaMoSKFw-q')
+        .then(() => {
+          showAlert('success', 'Your booking request email was sent successfully!');
+        }, (error) => {
+          showAlert('error', 'Failed to send booking request email.');
+        });
 
       // Save booking to database
       db.collection("bookings").add({
@@ -387,7 +443,7 @@ function initFormHandlers() {
         });
       }).catch((error) => {
         console.error("Error saving booking: ", error);
-        showCustomAlert("Error processing booking. Please try again.", "error");
+        showAlert('error', "Error processing booking. Please try again.");
       }).finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -406,7 +462,7 @@ function initFormHandlers() {
       const message = document.getElementById('contact-message').value.trim();
 
       if (!name || !email || !message) {
-        alert("Please fill all required fields.");
+        showAlert("error", "Please fill all required fields.");
         return;
       }
 
@@ -416,6 +472,19 @@ function initFormHandlers() {
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
       submitBtn.disabled = true;
 
+      // EmailJS Send
+      emailjs.send('Gonah Homes', 'template_p667wcm', {
+        from_name: name,
+        from_email: email,
+        message: message,
+        form_type: "Contact"
+      }, 'z1Isb0xDLyKoaMoSKFw-q')
+        .then(() => {
+          showAlert('success', 'Your message was sent successfully!');
+        }, (error) => {
+          showAlert('error', 'Failed to send your message.');
+        });
+
       // Save message to database
       db.collection("messages").add({
         name: name,
@@ -424,7 +493,7 @@ function initFormHandlers() {
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         status: 'new'
       }).then(() => {
-        showCustomAlert("Thank you for your message! We will get back to you soon.", "success");
+        showAlert('success', "Thank you for your message! We will get back to you soon.");
         contactForm.reset();
         
         // Send notification to admin
@@ -440,7 +509,7 @@ function initFormHandlers() {
         });
       }).catch((error) => {
         console.error("Error sending message: ", error);
-        showCustomAlert("Error sending message. Please try again.", "error");
+        showAlert('error', "Error sending message. Please try again.");
       }).finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
