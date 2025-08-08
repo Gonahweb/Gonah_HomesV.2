@@ -4,7 +4,7 @@
 class NotificationService {
   constructor() {
     this.db = firebase.firestore();
-    this.adminEmail = "salimtuva0@gmail.com";
+    this.adminEmail = "gonahhomes0@gmail.com";
     this.adminPhone = "+254799466723";
     this.setupNotificationListener();
   }
