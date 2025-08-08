@@ -12,14 +12,13 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-
 const db = firebase.firestore();
 let currentUser = null;
 const adminEmail = "salimtuva0@gmail.com";
 
 // EmailJS Initialization
 (function () {
-  emailjs.init("z1Isb0xDLyKoaMoSKFw-q"); // Your public key
+  emailjs.init("z1Isb0xDLyKoaMoSKFw-q");
 })();
 
 // Utility Functions
@@ -42,7 +41,6 @@ function formatDate(dateString) {
 function initMobileNav() {
   const hamburger = document.getElementById('hamburger');
   const navMenu = document.getElementById('nav-menu');
-
   if (hamburger && navMenu) {
     hamburger.addEventListener('click', (e) => {
       e.preventDefault();
@@ -50,16 +48,12 @@ function initMobileNav() {
       navMenu.classList.toggle('active');
       hamburger.classList.toggle('active');
     });
-
-    // Close menu when clicking on links
     navMenu.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
         navMenu.classList.remove('active');
         hamburger.classList.remove('active');
       });
     });
-
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
         navMenu.classList.remove('active');
@@ -74,7 +68,6 @@ function openBookingModal(house) {
   const modal = document.getElementById('booking-modal-bg');
   const form = document.getElementById('booking-form');
   const confirmDiv = document.getElementById('booking-confirm');
-
   if (modal && form && confirmDiv) {
     modal.classList.add('active');
     document.getElementById('booking-house').value = house;
@@ -86,24 +79,18 @@ function openBookingModal(house) {
     const today = new Date().toISOString().split('T')[0];
     const checkinInput = document.getElementById('booking-checkin');
     const checkoutInput = document.getElementById('booking-checkout');
-    
     checkinInput.min = today;
     checkoutInput.min = today;
-    
-    // Update checkout min date when checkin changes
     checkinInput.addEventListener('change', function() {
       const checkinDate = new Date(this.value);
-      checkinDate.setDate(checkinDate.getDate() + 1); // Next day minimum
+      checkinDate.setDate(checkinDate.getDate() + 1);
       checkoutInput.min = checkinDate.toISOString().split('T')[0];
-      
-      // Clear checkout if it's before the new minimum
       if (checkoutInput.value && new Date(checkoutInput.value) <= new Date(this.value)) {
         checkoutInput.value = '';
       }
     });
   }
 }
-
 function closeBookingModal() {
   const modal = document.getElementById('booking-modal-bg');
   if (modal) {
@@ -118,7 +105,6 @@ function showUserInfo(email) {
   const userEmail = document.getElementById('user-email');
   const emailForm = document.getElementById('email-form');
   const reviewForm = document.getElementById('review-form');
-
   if (userInfo && userName && userEmail && emailForm && reviewForm) {
     userInfo.style.display = 'block';
     userName.textContent = email.split('@')[0];
@@ -127,12 +113,10 @@ function showUserInfo(email) {
     emailForm.style.display = 'none';
   }
 }
-
 function hideUserInfo() {
   const userInfo = document.getElementById('user-info');
   const emailForm = document.getElementById('email-form');
   const reviewForm = document.getElementById('review-form');
-
   if (userInfo && emailForm && reviewForm) {
     userInfo.style.display = 'none';
     emailForm.style.display = 'block';
@@ -143,7 +127,6 @@ function hideUserInfo() {
 function renderTestimonials(reviews) {
   const testimonialsGrid = document.getElementById('testimonials-grid');
   if (!testimonialsGrid) return;
-
   if (!reviews || reviews.length === 0) {
     testimonialsGrid.innerHTML = `
       <div class="testimonial-card">
@@ -188,14 +171,12 @@ function renderTestimonials(reviews) {
     `;
     return;
   }
-
   let html = '';
   reviews.slice(0, 6).forEach(review => {
     const rating = '★'.repeat(Number(review.rating || 5));
     const reviewDate = review.timestamp ? new Date(review.timestamp.toDate()).toLocaleDateString() : '';
     const userName = review.user?.name || review.user?.email?.split('@')[0] || 'Anonymous';
     const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=100&background=800000&color=fff`;
-
     html += `
       <div class="testimonial-card">
         <div class="testimonial-rating">
@@ -218,7 +199,6 @@ function renderTestimonials(reviews) {
       </div>
     `;
   });
-
   testimonialsGrid.innerHTML = html;
 }
 
@@ -235,7 +215,7 @@ function loadReviews() {
   });
 }
 
-// EmailJS Alert Utility
+// ALERT UTILITY FOR EMAILJS
 function showAlert(type, message) {
   const alertDiv = document.createElement('div');
   alertDiv.className = `custom-alert alert-${type}`;
@@ -266,7 +246,6 @@ function initFormHandlers() {
       }
     });
   }
-
   // Sign out button
   const signOutBtn = document.getElementById('signout-btn');
   if (signOutBtn) {
@@ -276,7 +255,6 @@ function initFormHandlers() {
       document.getElementById('email-input').value = '';
     });
   }
-
   // Review form
   const reviewForm = document.getElementById('review-form');
   if (reviewForm) {
@@ -286,26 +264,21 @@ function initFormHandlers() {
         showAlert("error", "Please enter your email to leave a review.");
         return;
       }
-
       const rating = document.querySelector('input[name="rating"]:checked')?.value || 0;
       const reviewText = document.getElementById('review-text').value.trim();
-
       if (!reviewText) {
         showAlert("error", "Please write a review!");
         return;
       }
-
       if (!rating) {
         showAlert("error", "Please select a rating!");
         return;
       }
-
       // Show loading state
       const submitBtn = reviewForm.querySelector('[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
       submitBtn.disabled = true;
-
       const reviewData = {
         review: reviewText,
         rating: rating,
@@ -316,7 +289,6 @@ function initFormHandlers() {
         },
         adminReply: null
       };
-
       // EmailJS Send
       emailjs.send('Gonah Homes', 'template_p667wcm', {
         from_name: reviewData.user.name,
@@ -329,12 +301,10 @@ function initFormHandlers() {
         }, (error) => {
           showAlert('error', 'Failed to send your review email.');
         });
-
       db.collection("reviews").add(reviewData).then(() => {
         document.getElementById('review-text').value = '';
         document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
         showAlert('success', "Thank you for your review! It has been submitted successfully.");
-        
         // Send notification to admin
         return db.collection("notifications").add({
           type: 'new_review',
@@ -363,32 +333,26 @@ function initFormHandlers() {
   if (bookingForm) {
     bookingForm.addEventListener('submit', (e) => {
       e.preventDefault();
-
       const formData = new FormData(bookingForm);
       const bookingData = Object.fromEntries(formData.entries());
-
       // Validation
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const checkinDate = new Date(bookingData.checkin);
       const checkoutDate = new Date(bookingData.checkout);
-
       if (!bookingData.name || !bookingData.guests || !bookingData.checkin || 
           !bookingData.checkout || !bookingData.phone || !bookingData.email) {
         showAlert("error", "Please fill all required booking fields.");
         return;
       }
-
       if (checkinDate < today) {
         showAlert("error", "Check-in date cannot be in the past.");
         return;
       }
-
       if (checkoutDate <= checkinDate) {
         showAlert("error", "Check-out date must be after check-in date.");
         return;
       }
-
       // Ensure at least one night stay
       const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
       const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -396,13 +360,11 @@ function initFormHandlers() {
         showAlert("error", "Minimum stay is one night.");
         return;
       }
-
       // Show loading state
       const submitBtn = bookingForm.querySelector('[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
       submitBtn.disabled = true;
-
       // EmailJS Send
       emailjs.send('Gonah Homes', 'template_p667wcm', {
         from_name: bookingData.name,
@@ -425,7 +387,6 @@ function initFormHandlers() {
         }, (error) => {
           showAlert('error', 'Failed to send booking request email.');
         });
-
       // Save booking to database
       db.collection("bookings").add({
         ...bookingData,
@@ -433,7 +394,6 @@ function initFormHandlers() {
         status: 'pending'
       }).then(() => {
         showBookingConfirmation(bookingData);
-        
         // Send notification to admin
         return db.collection("notifications").add({
           type: 'new_booking',
@@ -456,22 +416,18 @@ function initFormHandlers() {
   if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
       e.preventDefault();
-
       const name = document.getElementById('contact-name').value.trim();
       const email = document.getElementById('contact-email').value.trim();
       const message = document.getElementById('contact-message').value.trim();
-
       if (!name || !email || !message) {
         showAlert("error", "Please fill all required fields.");
         return;
       }
-
       // Show loading state
       const submitBtn = contactForm.querySelector('[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
       submitBtn.disabled = true;
-
       // EmailJS Send
       emailjs.send('Gonah Homes', 'template_p667wcm', {
         from_name: name,
@@ -484,7 +440,6 @@ function initFormHandlers() {
         }, (error) => {
           showAlert('error', 'Failed to send your message.');
         });
-
       // Save message to database
       db.collection("messages").add({
         name: name,
@@ -495,7 +450,6 @@ function initFormHandlers() {
       }).then(() => {
         showAlert('success', "Thank you for your message! We will get back to you soon.");
         contactForm.reset();
-        
         // Send notification to admin
         return db.collection("notifications").add({
           type: 'new_message',
@@ -522,11 +476,9 @@ function showBookingConfirmation(bookingData) {
   const form = document.getElementById('booking-form');
   const confirmDiv = document.getElementById('booking-confirm');
   const detailsDiv = document.getElementById('booking-details');
-
   if (form && confirmDiv && detailsDiv) {
     form.style.display = 'none';
     confirmDiv.style.display = 'block';
-
     detailsDiv.innerHTML = `
       <p><strong>Accommodation:</strong> ${bookingData.house}</p>
       <p><strong>Guest Name:</strong> ${bookingData.name}</p>
@@ -563,7 +515,6 @@ function initAnimations() {
     threshold: 0.1,
     rootMargin: '0px 0px -50px 0px'
   };
-
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -571,8 +522,6 @@ function initAnimations() {
       }
     });
   }, observerOptions);
-
-  // Observe elements for animation
   document.querySelectorAll('.accommodation-card, .feature-card, .testimonial-card, .quick-link-card').forEach(el => {
     observer.observe(el);
   });
@@ -588,8 +537,6 @@ function initModalHandlers() {
       }
     });
   }
-
-  // ESC key to close modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeBookingModal();
@@ -628,42 +575,30 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavbarScroll();
   loadReviews();
   hideUserInfo();
-
   console.log('Gonah Homes website initialized successfully!');
 });
 
 // Custom Alert Function
 function showCustomAlert(message, type = "success") {
-  // Remove any existing alert
   const existingAlert = document.querySelector('.custom-alert');
   if (existingAlert) {
     existingAlert.remove();
   }
-
   const alertBox = document.createElement('div');
   alertBox.classList.add('custom-alert');
-  alertBox.classList.add(type); // 'success', 'error', etc.
-
+  alertBox.classList.add(type);
   const messageBox = document.createElement('p');
   messageBox.textContent = message;
-
   const closeBtn = document.createElement('span');
   closeBtn.classList.add('alert-close-btn');
-  closeBtn.innerHTML = '&times;'; // Times symbol for close button
-
+  closeBtn.innerHTML = '&times;';
   alertBox.appendChild(messageBox);
   alertBox.appendChild(closeBtn);
-
-  // Add to the body
   document.body.appendChild(alertBox);
-
-  // Close the alert when the close button is clicked
   closeBtn.addEventListener('click', () => {
     alertBox.remove();
   });
-
-  // Automatically close the alert after a few seconds (e.g., 5 seconds)
   setTimeout(() => {
     alertBox.remove();
   }, 5000);
-    }
+}
