@@ -18,7 +18,7 @@ const adminEmail = "salimtuva0@gmail.com";
 
 // EmailJS Initialization
 (function () {
-  emailjs.init("z1Isb0xDLyKoaMoSKFw-q");
+  emailjs.init("BsJ09OxTZftp2uMK8");
 })();
 
 // Utility Functions
@@ -295,7 +295,7 @@ function initFormHandlers() {
         from_email: reviewData.user.email,
         message: `Rating: ${rating}\nReview: ${reviewText}`,
         form_type: "Review"
-      }, 'z1Isb0xDLyKoaMoSKFw-q')
+      }, 'BsJ09OxTZftp2uMK8')
         .then(() => {
           showAlert('success', 'Thank you for your review! Email sent successfully.');
         }, (error) => {
@@ -381,7 +381,7 @@ function initFormHandlers() {
           Special Requests: ${bookingData.requests}
         `,
         form_type: "Booking"
-      }, 'z1Isb0xDLyKoaMoSKFw-q')
+      }, 'BsJ09OxTZftp2uMK8')
         .then(() => {
           showAlert('success', 'Your booking request email was sent successfully!');
         }, (error) => {
@@ -434,7 +434,7 @@ function initFormHandlers() {
         from_email: email,
         message: message,
         form_type: "Contact"
-      }, 'z1Isb0xDLyKoaMoSKFw-q')
+      }, 'BsJ09OxTZftp2uMK8')
         .then(() => {
           showAlert('success', 'Your message was sent successfully!');
         }, (error) => {
