@@ -25,7 +25,7 @@ class NotificationService {
   async processNotification(doc) {
     const notification = doc.data();
     const notificationId = doc.id;
-    
+
     try {
       switch (notification.type) {
         case 'new_booking':
@@ -38,13 +38,13 @@ class NotificationService {
           await this.sendReviewNotification(notification.data);
           break;
       }
-      
+
       // Mark notification as processed
       await this.db.collection('notifications').doc(notificationId).update({
         status: 'sent',
         sentAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      
+
     } catch (error) {
       console.error('Error processing notification:', error);
       await this.db.collection('notifications').doc(notificationId).update({
@@ -77,7 +77,7 @@ class NotificationService {
       Admin Panel: ${window.location.origin}/admin.html
     `;
 
-    await this.sendEmail(subject, body);
+    await this.sendEmail(subject, body, bookingData);
     await this.sendSMS(`New booking: ${bookingData.name} - ${bookingData.house}. Check admin panel for details.`);
   }
 
@@ -97,7 +97,7 @@ class NotificationService {
       Admin Panel: ${window.location.origin}/admin.html
     `;
 
-    await this.sendEmail(subject, body);
+    await this.sendEmail(subject, body, messageData);
   }
 
   async sendReviewNotification(reviewData) {
@@ -114,55 +114,58 @@ class NotificationService {
       Admin Panel: ${window.location.origin}/admin.html
     `;
 
-    await this.sendEmail(subject, body);
+    await this.sendEmail(subject, body, reviewData);
   }
 
-  async sendEmail(subject, body) {
-  try {
-    // Send via EmailJS
-    await emailjs.send("Gonah_Homes", "template_p667wcm", {
-      from_name: this.latestBooking?.name || "Guest",
-      reply_to: this.latestBooking?.email || this.adminEmail,
-      phone: this.latestBooking?.phone || "",
-      house: this.latestBooking?.house || "",
-      guests: this.latestBooking?.guests || "",
-      checkin: this.latestBooking?.checkin || "",
-      checkout: this.latestBooking?.checkout || "",
-      requests: (this.latestBooking?.requests || "").substring(0, 100),
-      access: (this.latestBooking?.access || "").substring(0, 100),
-      admin_link: window.location.origin + "/admin.html"
-    });
+  async sendEmail(subject, body, data) {
+    try {
+      // Send via EmailJS
+      await emailjs.send("Gonah Homes", "template_p667wcm", {
+        from_name: data?.name || data?.user?.name || "Guest",
+        reply_to: data?.email || data?.user?.email || this.adminEmail,
+        phone: data?.phone || "",
+        house: data?.house || "",
+        guests: data?.guests || "",
+        checkin: data?.checkin || "",
+        checkout: data?.checkout || "",
+        requests: (data?.requests || "").substring(0, 100),
+        access: (data?.access || "").substring(0, 100),
+        admin_link: window.location.origin + "/admin.html",
+        message: body // message body for template
+      });
 
-    // Log to Firestore (optional)
-    await this.db.collection('email_logs').add({
-      to: this.adminEmail,
-      subject: subject,
-      body: JSON.stringify(this.latestBooking),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'sent'
-    });
+      // Log to Firestore (optional)
+      await this.db.collection('email_logs').add({
+        to: this.adminEmail,
+        subject: subject,
+        data: data,
+        body: body,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'sent'
+      });
 
-    console.log("✅ Email sent via EmailJS");
+      console.log("✅ Email sent via EmailJS");
 
-  } catch (error) {
-    console.error("❌ EmailJS error:", error.message);
+    } catch (error) {
+      console.error("❌ EmailJS error:", error.message);
 
-    await this.db.collection('email_logs').add({
-      to: this.adminEmail,
-      subject: subject,
-      body: body,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'failed',
-      error: error.message
-    });
-  }
+      await this.db.collection('email_logs').add({
+        to: this.adminEmail,
+        subject: subject,
+        data: data,
+        body: body,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'failed',
+        error: error.message
+      });
+    }
   }
 
   async sendSMS(message) {
     // Using Africa's Talking or similar SMS service
     // For now, we'll log the SMS
     console.log('📱 SMS Notification:', message);
-    
+
     await this.db.collection('sms_logs').add({
       to: this.adminPhone,
       message: message,
