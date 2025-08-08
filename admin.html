@@ -243,6 +243,8 @@
       }
     }
   </style>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 <body>
   <!-- Login Screen -->
@@ -551,8 +553,10 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // Initialize EmailJS
+    emailjs.init("z1Isb0xDLyKoaMoSKFw-q");
+
     let currentAdmin = null;
-    // Admin configuration
     const ADMIN_EMAIL = 'salimtuva0@gmail.com';
     const ADMIN_PASSWORD = 'gonahhomes@0799466723';
 
@@ -564,7 +568,6 @@
 
     // Authentication
     auth.onAuthStateChanged((user) => {
-      console.log('Auth state changed:', user ? user.email : 'No user');
       if (user && user.email === ADMIN_EMAIL) {
         currentAdmin = user;
         showDashboard();
@@ -601,7 +604,6 @@
         document.getElementById('reset-success').textContent = 'Password reset email sent! Check your inbox and spam folder.';
         loginError.textContent = '';
       } catch (error) {
-        console.error('Password reset error:', error);
         if (error.code === 'auth/user-not-found') {
           loginError.textContent = 'No account found with this email. Please create an account first.';
         } else {
@@ -636,12 +638,8 @@
       }
 
       try {
-        console.log('Attempting to sign in...');
         await auth.signInWithEmailAndPassword(email, password);
-        console.log('Sign in successful');
       } catch (error) {
-        console.error('Login error:', error);
-        // If Firebase fails but password matches, allow direct login
         if (password === ADMIN_PASSWORD) {
           currentAdmin = { email: ADMIN_EMAIL, uid: 'admin-direct' };
           showDashboard();
@@ -661,7 +659,6 @@
             showLogin();
           });
         } else {
-          // Direct logout for non-Firebase users
           currentAdmin = null;
           showLogin();
         }
@@ -696,7 +693,6 @@
       document.getElementById('section-title').textContent = 
         sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
 
-      // Load section-specific data
       loadSectionData(sectionName);
     }
 
@@ -707,7 +703,6 @@
       activeLink.classList.add('active');
     }
 
-    // Data Loading Functions
     function loadDashboardData() {
       loadBookingsCount();
       loadReviewsCount();
@@ -742,27 +737,21 @@
       try {
         const snapshot = await db.collection('bookings').get();
         document.getElementById('total-bookings').textContent = snapshot.size;
-      } catch (error) {
-        console.error('Error loading bookings count:', error);
-      }
+      } catch (error) {}
     }
 
     async function loadReviewsCount() {
       try {
         const snapshot = await db.collection('reviews').get();
         document.getElementById('total-reviews').textContent = snapshot.size;
-      } catch (error) {
-        console.error('Error loading reviews count:', error);
-      }
+      } catch (error) {}
     }
 
     async function loadMessagesCount() {
       try {
         const snapshot = await db.collection('messages').get();
         document.getElementById('total-messages').textContent = snapshot.size;
-      } catch (error) {
-        console.error('Error loading messages count:', error);
-      }
+      } catch (error) {}
     }
 
     function loadRecentActivity() {
@@ -784,7 +773,6 @@
           tbody.innerHTML = '<tr><td colspan="7">No bookings found.</td></tr>';
           return;
         }
-
         let html = '';
         snapshot.forEach((doc) => {
           const booking = doc.data();
@@ -814,7 +802,6 @@
           tbody.innerHTML = '<tr><td colspan="5">No reviews found.</td></tr>';
           return;
         }
-
         let html = '';
         snapshot.forEach((doc) => {
           const review = doc.data();
@@ -843,14 +830,12 @@
           tbody.innerHTML = '<tr><td colspan="6">No messages found.</td></tr>';
           return;
         }
-
         let html = '';
         snapshot.forEach((doc) => {
           const message = doc.data();
           const date = message.timestamp ? new Date(message.timestamp.toDate()).toLocaleDateString() : 'N/A';
           const statusClass = message.status === 'new' ? 'btn-warning' : 'btn-success';
           const statusText = message.status === 'new' ? 'New' : 'Read';
-          
           html += `
             <tr>
               <td>${message.name || 'N/A'}</td>
@@ -871,20 +856,17 @@
     }
 
     function loadTrafficData() {
-      // Placeholder analytics data
       document.getElementById('page-views-today').textContent = '247';
       document.getElementById('unique-visitors').textContent = '89';
       document.getElementById('bounce-rate').textContent = '23%';
     }
 
     function loadOffers() {
-      // Placeholder offers data
       const tbody = document.getElementById('offers-tbody');
       tbody.innerHTML = '<tr><td colspan="5">No offers created yet.</td></tr>';
     }
 
     function loadClients() {
-      // Placeholder clients data
       const tbody = document.getElementById('clients-tbody');
       tbody.innerHTML = `
         <tr>
@@ -900,14 +882,82 @@
       `;
     }
 
-    // Action Functions
-    function confirmBooking(bookingId) {
+    // --- EmailJS Helper for Admin Replies & Booking Confirmation ---
+    function sendEmailToClient(to_email, reply_text, context_type, booking_details = null) {
+      let params = {
+        to_email: to_email,
+        message: reply_text,
+        form_type: "Admin Reply (" + context_type + ")"
+      };
+      if (context_type === "Booking Confirmed" && booking_details) {
+        params.message = `Dear ${booking_details.name},\n\nYour booking for ${booking_details.house} from ${booking_details.checkin} to ${booking_details.checkout} has been confirmed!\n\nThank you for booking with Gonah Homes.\n\nBest regards,\nGonah Homes Team`;
+        params.from_name = "Gonah Homes Admin";
+        params.from_email = "gonahproperties@gmail.com";
+      }
+      emailjs.send('Gonah Homes', 'template_p667wcm', params, 'z1Isb0xDLyKoaMoSKFw-q')
+        .then(() => {
+          alert("Email sent to client!");
+        })
+        .catch((error) => {
+          alert("Failed to send email: " + error.text);
+        });
+    }
+
+    // --- Review Reply Submission ---
+    document.getElementById('reply-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const reviewId = document.getElementById('reply-review-id').value;
+      const replyText = document.getElementById('reply-text').value;
+      const reviewDoc = await db.collection('reviews').doc(reviewId).get();
+      const reviewData = reviewDoc.data();
+      const clientEmail = reviewData?.user?.email || "";
+      db.collection('reviews').doc(reviewId).update({
+        adminReply: replyText,
+        adminReplyAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        closeModal('reply-modal');
+        document.getElementById('reply-text').value = '';
+        alert('Reply saved successfully!');
+        if (clientEmail) {
+          sendEmailToClient(clientEmail, replyText, "Review");
+        }
+      });
+    });
+
+    // --- Message Reply Submission ---
+    document.getElementById('message-reply-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const messageId = document.getElementById('message-id').value;
+      const replyText = document.getElementById('message-reply-text').value;
+      const msgDoc = await db.collection('messages').doc(messageId).get();
+      const msgData = msgDoc.data();
+      const clientEmail = msgData?.email || "";
+      db.collection('messages').doc(messageId).update({
+        adminReply: replyText,
+        adminReplyAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        closeModal('message-modal');
+        document.getElementById('message-reply-text').value = '';
+        alert('Reply saved successfully!');
+        if (clientEmail) {
+          sendEmailToClient(clientEmail, replyText, "Message");
+        }
+      });
+    });
+
+    // --- Booking Confirmation Button Logic (Send Email) ---
+    async function confirmBooking(bookingId) {
       if (confirm('Confirm this booking?')) {
+        const bookingDoc = await db.collection('bookings').doc(bookingId).get();
+        const bookingData = bookingDoc.data();
         db.collection('bookings').doc(bookingId).update({
           status: 'confirmed',
           confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
           alert('Booking confirmed successfully!');
+          if (bookingData.email) {
+            sendEmailToClient(bookingData.email, "", "Booking Confirmed", bookingData);
+          }
         });
       }
     }
@@ -928,12 +978,9 @@
     function contactClient(email, phone = null) {
       const contactMethod = phone ? 
         confirm(`Contact ${email}?\nOK = Email\nCancel = WhatsApp (${phone})`) : true;
-      
       if (contactMethod) {
-        // Email contact
         window.open(`mailto:${email}?subject=Gonah Homes - Follow Up&body=Dear Customer,%0D%0A%0D%0AThank you for choosing Gonah Homes. We are reaching out regarding your inquiry.%0D%0A%0D%0ABest regards,%0D%0AGonah Homes Team`);
       } else if (phone) {
-        // WhatsApp contact
         const message = encodeURIComponent("Hello! Thank you for choosing Gonah Homes. We are reaching out regarding your inquiry.");
         window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`);
       }
@@ -977,40 +1024,20 @@
       db.collection('messages').doc(messageId).update({
         status: 'read',
         readAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        console.log('Message marked as read');
-      });
+      }).then(() => {});
     }
 
     function closeModal(modalId) {
       document.getElementById(modalId).style.display = 'none';
     }
 
-    // Reply form submissions
-    document.getElementById('reply-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const reviewId = document.getElementById('reply-review-id').value;
-      const replyText = document.getElementById('reply-text').value;
-
-      db.collection('reviews').doc(reviewId).update({
-        adminReply: replyText,
-        adminReplyAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        alert('Reply sent successfully!');
-        closeModal('reply-modal');
-        document.getElementById('reply-text').value = '';
-      });
-    });
-
-    // Settings form
     document.getElementById('settings-form').addEventListener('submit', (e) => {
       e.preventDefault();
       alert('Settings saved successfully!');
     });
 
-    // Initialize dashboard
     loadDashboardData();
   </script>
   <script src="notification-service.js"></script>
 </body>
-              </html>
+</html>
