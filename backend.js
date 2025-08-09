@@ -1,12 +1,26 @@
 // Backend functionality for Gonah Homes Admin System
-// This script handles data collection, storage, and management
+// This script handles data collection, storage, management, and email notifications using EmailJS
 
 class GonahHomesBackend {
   constructor() {
     this.db = firebase.firestore();
     this.auth = firebase.auth();
+    this.emailjsPublicKey = "z1Isb0xDLyKoaMoSKFw-q"; // <-- Use your correct key here!
+    this.emailjsServiceId = "Gonah Homes";
+    this.adminTemplateId = "template_68fd8qu";
+    this.bookingConfirmationTemplateId = "template_p667wcm";
+    this.adminEmail = "salimtuva0@gmail.com";
+    this.mpesaNumber = "0799466723";
     this.initializeCollections();
     this.setupTrafficTracking();
+    this.initEmailJS();
+  }
+
+  // Initialize EmailJS
+  initEmailJS() {
+    if (typeof emailjs !== "undefined") {
+      emailjs.init(this.emailjsPublicKey);
+    }
   }
 
   // Initialize Firebase collections
@@ -38,8 +52,11 @@ class GonahHomesBackend {
       // Also save client data
       await this.saveClient(bookingData);
 
-      // Send confirmation email
-      await this.sendBookingConfirmation(booking);
+      // Send notification email to admin
+      await this.sendAdminBookingNotification(booking);
+
+      // Send confirmation email to client
+      await this.sendBookingConfirmationEmail(booking);
 
       return { success: true, bookingId: docRef.id };
     } catch (error) {
@@ -94,8 +111,8 @@ class GonahHomesBackend {
 
       const docRef = await this.collections.messages.add(message);
 
-      // Send notification to admin
-      await this.notifyAdmin('new_message', message);
+      // Send notification email to admin
+      await this.sendAdminMessageNotification(message);
 
       return { success: true, messageId: docRef.id };
     } catch (error) {
@@ -106,6 +123,10 @@ class GonahHomesBackend {
 
   async replyToMessage(messageId, replyText, adminEmail) {
     try {
+      const messageDoc = await this.collections.messages.doc(messageId).get();
+      if (!messageDoc.exists) throw new Error("Original message not found");
+      const message = messageDoc.data();
+
       const reply = {
         text: replyText,
         from: adminEmail,
@@ -118,6 +139,9 @@ class GonahHomesBackend {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
+      // Send email reply to client using EmailJS booking confirmation template (for consistency)
+      await this.sendAdminReplyEmail(message.email, replyText, message);
+
       return { success: true };
     } catch (error) {
       console.error('Error replying to message:', error);
@@ -125,7 +149,131 @@ class GonahHomesBackend {
     }
   }
 
-  // Email Management
+  // Review Management
+  async saveReview(reviewData) {
+    try {
+      const review = {
+        ...reviewData,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'pending'
+      };
+
+      const docRef = await this.collections.reviews.add(review);
+
+      // Send notification email to admin
+      await this.sendAdminReviewNotification(review);
+
+      return { success: true, reviewId: docRef.id };
+    } catch (error) {
+      console.error('Error saving review:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // EmailJS Email Sending Functions
+
+  // Booking notification to admin
+  async sendAdminBookingNotification(booking) {
+    try {
+      await emailjs.send(this.emailjsServiceId, this.adminTemplateId, {
+        from_name: booking.name,
+        reply_to: booking.email,
+        phone: booking.phone,
+        house: booking.house,
+        guests: booking.guests,
+        checkin: booking.checkin,
+        checkout: booking.checkout,
+        requests: booking.requests || "",
+        access: booking.access || "",
+        message: `New booking for ${booking.house}.\nGuest: ${booking.name}\nDates: ${booking.checkin} to ${booking.checkout}\nGuests: ${booking.guests}\nRequests: ${booking.requests || ''}\nAccess: ${booking.access || ''}`,
+        admin_link: window.location.origin + "/admin.html"
+      });
+    } catch (error) {
+      console.error("Error sending admin booking notification:", error);
+    }
+  }
+
+  // Booking confirmation to client
+  async sendBookingConfirmationEmail(booking) {
+    try {
+      await emailjs.send(this.emailjsServiceId, this.bookingConfirmationTemplateId, {
+        to_email: booking.email,
+        from_name: "Gonah Homes",
+        booking_details: `
+          Property: ${booking.house}
+          Check-in: ${booking.checkin}
+          Check-out: ${booking.checkout}
+          Guests: ${booking.guests}
+        `,
+        message: `Dear ${booking.name},
+
+Thank you for booking with Gonah Homes!
+
+To confirm your booking, please pay the booking fee to:
+M-Pesa: ${this.mpesaNumber}
+
+We will contact you shortly for confirmation.
+
+Best regards,
+Gonah Homes Team
+        `,
+        subject: "Booking Confirmation - Gonah Homes"
+      });
+    } catch (error) {
+      console.error("Error sending booking confirmation email:", error);
+    }
+  }
+
+  // New message notification to admin
+  async sendAdminMessageNotification(message) {
+    try {
+      await emailjs.send(this.emailjsServiceId, this.adminTemplateId, {
+        from_name: message.name,
+        reply_to: message.email,
+        message: message.message,
+        admin_link: window.location.origin + "/admin.html"
+      });
+    } catch (error) {
+      console.error("Error sending admin message notification:", error);
+    }
+  }
+
+  // Admin reply to client
+  async sendAdminReplyEmail(clientEmail, replyText, originalMessage) {
+    try {
+      await emailjs.send(this.emailjsServiceId, this.bookingConfirmationTemplateId, {
+        to_email: clientEmail,
+        from_name: "Gonah Homes Admin",
+        reply_message: replyText,
+        booking_details: originalMessage.house ? `
+          Property: ${originalMessage.house}
+          Check-in: ${originalMessage.checkin || ""}
+          Check-out: ${originalMessage.checkout || ""}
+          Guests: ${originalMessage.guests || ""}
+        ` : "",
+        subject: "Reply from Gonah Homes"
+      });
+    } catch (error) {
+      console.error("Error sending admin reply email:", error);
+    }
+  }
+
+  // Review notification to admin
+  async sendAdminReviewNotification(review) {
+    try {
+      await emailjs.send(this.emailjsServiceId, this.adminTemplateId, {
+        from_name: review.user?.name || review.name || "Guest",
+        reply_to: review.user?.email || review.email || this.adminEmail,
+        rating: review.rating,
+        review: review.review,
+        admin_link: window.location.origin + "/admin.html"
+      });
+    } catch (error) {
+      console.error("Error sending admin review notification:", error);
+    }
+  }
+
+  // Email Management (saves a record, does NOT send email!)
   async saveEmail(emailData) {
     try {
       const email = {
@@ -268,48 +416,6 @@ class GonahHomesBackend {
     }
   }
 
-  // Notification System
-  async notifyAdmin(type, data) {
-    // Implement notification logic (email, SMS, etc.)
-    console.log(`Admin notification: ${type}`, data);
-  }
-
-  // Email Confirmation
-  async sendBookingConfirmation(booking) {
-    try {
-      const emailData = {
-        to: booking.email,
-        subject: 'Booking Confirmation - Gonah Homes',
-        body: `
-          Dear ${booking.name},
-
-          Thank you for booking with Gonah Homes!
-
-          Booking Details:
-          - Property: ${booking.house}
-          - Check-in: ${booking.checkin}
-          - Check-out: ${booking.checkout}
-          - Guests: ${booking.guests}
-
-          To confirm your booking, please pay the booking fee to:
-          M-Pesa: 0799466723
-
-          We will contact you shortly for confirmation.
-
-          Best regards,
-          Gonah Homes Team
-        `,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      await this.saveEmail(emailData);
-      return { success: true };
-    } catch (error) {
-      console.error('Error sending booking confirmation:', error);
-      return { success: false, error: error.message };
-    }
-  }
-
   // Utility functions
   generateBookingId() {
     const timestamp = Date.now().toString();
@@ -361,7 +467,7 @@ class GonahHomesBackend {
             ${bookingData.requests ? `<p><b>Special Requests:</b> ${bookingData.requests}</p>` : ""}
             <div style="margin:1.1em 0;">
               <b>To confirm, kindly pay booking fee to Mpesa number:</b><br>
-              <span style="font-size:1.2em;color:#800000;font-weight:700;">0799466723</span>
+              <span style="font-size:1.2em;color:#800000;font-weight:700;">${this.mpesaNumber}</span>
             </div>
             <p>After payment, you will be contacted for confirmation. Thank you!</p>
           `;
@@ -384,4 +490,3 @@ document.addEventListener('DOMContentLoaded', function() {
     window.gonahBackend = backend;
   }
 });
-const adminEmail = "salimtuva0@gmail.com";
