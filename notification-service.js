@@ -1,16 +1,17 @@
 // Email Notification Service for Gonah Homes
-// This service handles sending email notifications to admin
+// Handles admin notifications AND sends booking confirmation/replies to client
 
 class NotificationService {
   constructor() {
     this.db = firebase.firestore();
-    this.adminEmail = "gonahhomes0@gmail.com";
+    this.adminEmail = "salimtuva0@gmail.com";
     this.adminPhone = "+254799466723";
     this.setupNotificationListener();
+    this.setupAdminReplyListener();
   }
 
   setupNotificationListener() {
-    // Listen for new notifications
+    // Listen for new notifications (booking/message/review)
     this.db.collection('notifications')
       .where('status', '==', 'pending')
       .onSnapshot((snapshot) => {
@@ -25,26 +26,24 @@ class NotificationService {
   async processNotification(doc) {
     const notification = doc.data();
     const notificationId = doc.id;
-
     try {
+      // Only send ONE admin notification per booking/message/review
       switch (notification.type) {
         case 'new_booking':
-          await this.sendBookingNotification(notification.data);
+          await this.sendAdminBookingNotification(notification.data);
           break;
         case 'new_message':
-          await this.sendMessageNotification(notification.data);
+          await this.sendAdminMessageNotification(notification.data);
           break;
         case 'new_review':
-          await this.sendReviewNotification(notification.data);
+          await this.sendAdminReviewNotification(notification.data);
           break;
       }
-
       // Mark notification as processed
       await this.db.collection('notifications').doc(notificationId).update({
         status: 'sent',
         sentAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-
     } catch (error) {
       console.error('Error processing notification:', error);
       await this.db.collection('notifications').doc(notificationId).update({
@@ -55,123 +54,114 @@ class NotificationService {
     }
   }
 
-  async sendBookingNotification(bookingData) {
-    const subject = `🏠 New Booking - ${bookingData.house}`;
-    const body = `
-      New booking received on Gonah Homes website!
-      
-      📋 Booking Details:
-      • Guest: ${bookingData.name}
-      • Property: ${bookingData.house}
-      • Guests: ${bookingData.guests}
-      • Check-in: ${bookingData.checkin}
-      • Check-out: ${bookingData.checkout}
-      • Email: ${bookingData.email}
-      • Phone: ${bookingData.phone}
-      
-      ${bookingData.access ? `🦽 Accessibility Needs: ${bookingData.access}` : ''}
-      ${bookingData.requests ? `📝 Special Requests: ${bookingData.requests}` : ''}
-      
-      💰 Action Required: Contact client to confirm booking and collect payment.
-      
-      Admin Panel: ${window.location.origin}/admin.html
-    `;
-
-    await this.sendEmail(subject, body, bookingData);
-    await this.sendSMS(`New booking: ${bookingData.name} - ${bookingData.house}. Check admin panel for details.`);
+  // Send booking notification to admin only (template_68fd8qu)
+  async sendAdminBookingNotification(bookingData) {
+    await emailjs.send("Gonah Homes", "template_68fd8qu", {
+      from_name: bookingData.name,
+      reply_to: bookingData.email,
+      phone: bookingData.phone,
+      house: bookingData.house,
+      guests: bookingData.guests,
+      checkin: bookingData.checkin,
+      checkout: bookingData.checkout,
+      requests: bookingData.requests || "",
+      access: bookingData.access || "",
+      message: `New booking received for ${bookingData.house}.\nGuest: ${bookingData.name}\nGuests: ${bookingData.guests}\nDates: ${bookingData.checkin} to ${bookingData.checkout}\nRequests: ${bookingData.requests || ''}\nAccess: ${bookingData.access || ''}`,
+      admin_link: window.location.origin + "/admin.html"
+    });
+    // Log to Firestore
+    await this.db.collection('email_logs').add({
+      to: this.adminEmail,
+      subject: "New Booking Notification",
+      data: bookingData,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'sent'
+    });
   }
 
-  async sendMessageNotification(messageData) {
-    const subject = `📧 New Message from ${messageData.name}`;
-    const body = `
-      New message received on Gonah Homes website!
-      
-      👤 From: ${messageData.name}
-      📧 Email: ${messageData.email}
-      
-      💬 Message:
-      ${messageData.message}
-      
-      Reply directly to this email or use the admin panel.
-      
-      Admin Panel: ${window.location.origin}/admin.html
-    `;
-
-    await this.sendEmail(subject, body, messageData);
+  // Send new message notification to admin (template_68fd8qu)
+  async sendAdminMessageNotification(messageData) {
+    await emailjs.send("Gonah Homes", "template_68fd8qu", {
+      from_name: messageData.name,
+      reply_to: messageData.email,
+      message: messageData.message,
+      admin_link: window.location.origin + "/admin.html"
+    });
+    await this.db.collection('email_logs').add({
+      to: this.adminEmail,
+      subject: "New Contact Message",
+      data: messageData,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'sent'
+    });
   }
 
-  async sendReviewNotification(reviewData) {
-    const subject = `⭐ New Review - ${reviewData.rating} stars`;
-    const body = `
-      New review submitted on Gonah Homes website!
-      
-      ⭐ Rating: ${reviewData.rating}/5 stars
-      👤 From: ${reviewData.user.name}
-      
-      📝 Review:
-      ${reviewData.review}
-      
-      Admin Panel: ${window.location.origin}/admin.html
-    `;
-
-    await this.sendEmail(subject, body, reviewData);
+  // Send review notification to admin (template_68fd8qu)
+  async sendAdminReviewNotification(reviewData) {
+    await emailjs.send("Gonah Homes", "template_68fd8qu", {
+      from_name: reviewData.user.name,
+      reply_to: reviewData.user.email,
+      rating: reviewData.rating,
+      review: reviewData.review,
+      admin_link: window.location.origin + "/admin.html"
+    });
+    await this.db.collection('email_logs').add({
+      to: this.adminEmail,
+      subject: "New Review Notification",
+      data: reviewData,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'sent'
+    });
   }
 
-  async sendEmail(subject, body, data) {
-    try {
-      // Send via EmailJS
-      await emailjs.send("Gonah Homes", "template_p667wcm", {
-        from_name: data?.name || data?.user?.name || "Guest",
-        reply_to: data?.email || data?.user?.email || this.adminEmail,
-        phone: data?.phone || "",
-        house: data?.house || "",
-        guests: data?.guests || "",
-        checkin: data?.checkin || "",
-        checkout: data?.checkout || "",
-        requests: (data?.requests || "").substring(0, 100),
-        access: (data?.access || "").substring(0, 100),
-        admin_link: window.location.origin + "/admin.html",
-        message: body // message body for template
+  // Listen for admin replies/booking confirmations in Firestore
+  setupAdminReplyListener() {
+    // Listen for replies/confirmations on bookings/messages/reviews
+    this.db.collection('admin_replies')
+      .where('status', '==', 'pending')
+      .onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            this.processAdminReply(change.doc);
+          }
+        });
       });
+  }
 
-      // Log to Firestore (optional)
+  async processAdminReply(doc) {
+    const reply = doc.data();
+    const replyId = doc.id;
+    try {
+      // Send reply to client (template_p667wcm)
+      await emailjs.send("Gonah Homes", "template_p667wcm", {
+        to_email: reply.client_email,
+        from_name: "Gonah Homes Admin",
+        reply_message: reply.message,
+        booking_details: reply.booking_details || "",
+        admin_name: reply.admin_name || "Admin",
+        subject: reply.subject || "Reply from Gonah Homes",
+      });
+      // Mark reply as sent
+      await this.db.collection('admin_replies').doc(replyId).update({
+        status: 'sent',
+        sentAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      // Log to Firestore
       await this.db.collection('email_logs').add({
-        to: this.adminEmail,
-        subject: subject,
-        data: data,
-        body: body,
+        to: reply.client_email,
+        subject: "Admin Reply/Booking Confirmation",
+        data: reply,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         status: 'sent'
       });
-
-      console.log("✅ Email sent via EmailJS");
-
     } catch (error) {
-      console.error("❌ EmailJS error:", error.message);
-
-      await this.db.collection('email_logs').add({
-        to: this.adminEmail,
-        subject: subject,
-        data: data,
-        body: body,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      console.error("Error sending admin reply:", error);
+      await this.db.collection('admin_replies').doc(replyId).update({
         status: 'failed',
-        error: error.message
+        error: error.message,
+        failedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
-  }
-
-  async sendSMS(message) {
-    // Using Africa's Talking or similar SMS service
-    // For now, we'll log the SMS
-    console.log('📱 SMS Notification:', message);
-
-    await this.db.collection('sms_logs').add({
-      to: this.adminPhone,
-      message: message,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'logged'
-    });
   }
 }
 
