@@ -16,9 +16,9 @@ const db = firebase.firestore();
 let currentUser = null;
 const adminEmail = "salimtuva0@gmail.com";
 
-// EmailJS Initialization
+// EmailJS Initialization (use your correct public key)
 (function () {
-  emailjs.init("m0UJnizGPuMyIeNwi");
+  emailjs.init("z1Isb0xDLyKoaMoSKFw-q");
 })();
 
 // Utility Functions
@@ -28,36 +28,29 @@ function scrollToSection(sectionId) {
     section.scrollIntoView({ behavior: 'smooth' });
   }
 }
-
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+    year: 'numeric', month: 'long', day: 'numeric'
   });
 }
 
-// Mobile Navigation
+// Mobile Navigation & UI
 function initMobileNav() {
   const hamburger = document.getElementById('hamburger');
   const navMenu = document.getElementById('nav-menu');
   if (hamburger && navMenu) {
     hamburger.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      navMenu.classList.toggle('active');
-      hamburger.classList.toggle('active');
+      e.preventDefault(); e.stopPropagation();
+      navMenu.classList.toggle('active'); hamburger.classList.toggle('active');
     });
     navMenu.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
-        hamburger.classList.remove('active');
+        navMenu.classList.remove('active'); hamburger.classList.remove('active');
       });
     });
     document.addEventListener('click', (e) => {
       if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) {
-        navMenu.classList.remove('active');
-        hamburger.classList.remove('active');
+        navMenu.classList.remove('active'); hamburger.classList.remove('active');
       }
     });
   }
@@ -71,19 +64,14 @@ function openBookingModal(house) {
   if (modal && form && confirmDiv) {
     modal.classList.add('active');
     document.getElementById('booking-house').value = house;
-    form.style.display = 'block';
-    confirmDiv.style.display = 'none';
-    form.reset();
-
+    form.style.display = 'block'; confirmDiv.style.display = 'none'; form.reset();
     // Set minimum dates to today
     const today = new Date().toISOString().split('T')[0];
     const checkinInput = document.getElementById('booking-checkin');
     const checkoutInput = document.getElementById('booking-checkout');
-    checkinInput.min = today;
-    checkoutInput.min = today;
+    checkinInput.min = today; checkoutInput.min = today;
     checkinInput.addEventListener('change', function() {
-      const checkinDate = new Date(this.value);
-      checkinDate.setDate(checkinDate.getDate() + 1);
+      const checkinDate = new Date(this.value); checkinDate.setDate(checkinDate.getDate() + 1);
       checkoutInput.min = checkinDate.toISOString().split('T')[0];
       if (checkoutInput.value && new Date(checkoutInput.value) <= new Date(this.value)) {
         checkoutInput.value = '';
@@ -93,9 +81,7 @@ function openBookingModal(house) {
 }
 function closeBookingModal() {
   const modal = document.getElementById('booking-modal-bg');
-  if (modal) {
-    modal.classList.remove('active');
-  }
+  if (modal) modal.classList.remove('active');
 }
 
 // Review System Functions
@@ -109,8 +95,7 @@ function showUserInfo(email) {
     userInfo.style.display = 'block';
     userName.textContent = email.split('@')[0];
     userEmail.textContent = email;
-    reviewForm.style.display = 'block';
-    emailForm.style.display = 'none';
+    reviewForm.style.display = 'block'; emailForm.style.display = 'none';
   }
 }
 function hideUserInfo() {
@@ -130,42 +115,27 @@ function renderTestimonials(reviews) {
   if (!reviews || reviews.length === 0) {
     testimonialsGrid.innerHTML = `
       <div class="testimonial-card">
-        <div class="testimonial-rating">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-        </div>
+        <div class="testimonial-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
         <p class="testimonial-text">"Amazing experience! The apartment was spotless, beautifully furnished, and the location was perfect. Will definitely book again!"</p>
         <div class="testimonial-author">
           <img src="https://images.unsplash.com/photo-1494790108755-2616b612b577?w=100&h=100&fit=crop&crop=face" alt="Sarah Johnson" class="author-avatar">
-          <div class="author-info">
-            <h4>Sarah Johnson</h4>
-            <span>Verified Guest</span>
-          </div>
+          <div class="author-info"><h4>Sarah Johnson</h4><span>Verified Guest</span></div>
         </div>
       </div>
       <div class="testimonial-card">
-        <div class="testimonial-rating">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-        </div>
+        <div class="testimonial-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
         <p class="testimonial-text">"Gonah Homes exceeded our expectations. The maisonette was luxurious and the customer service was outstanding. Highly recommended!"</p>
         <div class="testimonial-author">
           <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Michael Chen" class="author-avatar">
-          <div class="author-info">
-            <h4>Michael Chen</h4>
-            <span>Verified Guest</span>
-          </div>
+          <div class="author-info"><h4>Michael Chen</h4><span>Verified Guest</span></div>
         </div>
       </div>
       <div class="testimonial-card">
-        <div class="testimonial-rating">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-        </div>
+        <div class="testimonial-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
         <p class="testimonial-text">"Perfect for our family vacation. The kids loved the space and we appreciated the modern amenities. Thank you Gonah Homes!"</p>
         <div class="testimonial-author">
           <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" alt="Emily Rodriguez" class="author-avatar">
-          <div class="author-info">
-            <h4>Emily Rodriguez</h4>
-            <span>Verified Guest</span>
-          </div>
+          <div class="author-info"><h4>Emily Rodriguez</h4><span>Verified Guest</span></div>
         </div>
       </div>
     `;
@@ -179,16 +149,11 @@ function renderTestimonials(reviews) {
     const userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=100&background=800000&color=fff`;
     html += `
       <div class="testimonial-card">
-        <div class="testimonial-rating">
-          ${rating.split('').map(() => '<i class="fas fa-star"></i>').join('')}
-        </div>
+        <div class="testimonial-rating">${rating.split('').map(() => '<i class="fas fa-star"></i>').join('')}</div>
         <p class="testimonial-text">"${review.review}"</p>
         <div class="testimonial-author">
           <img src="${userAvatar}" alt="${userName}" class="author-avatar">
-          <div class="author-info">
-            <h4>${userName}</h4>
-            <span>Verified Guest ${reviewDate ? '• ' + reviewDate : ''}</span>
-          </div>
+          <div class="author-info"><h4>${userName}</h4><span>Verified Guest ${reviewDate ? '• ' + reviewDate : ''}</span></div>
         </div>
         ${review.adminReply ? `
           <div class="admin-reply" style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: var(--border-radius); border-left: 4px solid var(--primary-color);">
@@ -289,32 +254,15 @@ function initFormHandlers() {
         },
         adminReply: null
       };
-      // EmailJS Send
-      emailjs.send('Gonah Homes', 'template_p667wcm', {
-        from_name: reviewData.user.name,
-        from_email: reviewData.user.email,
-        message: `Rating: ${rating}\nReview: ${reviewText}`,
-        form_type: "Review"
-      }, 'm0UJnizGPuMyIeNwi')
-        .then(() => {
-          showAlert('success', 'Thank you for your review! Email sent successfully.');
-        }, (error) => {
-          showAlert('error', 'Failed to send your review email.');
-        });
+      // Save review to database
       db.collection("reviews").add(reviewData).then(() => {
         document.getElementById('review-text').value = '';
         document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
         showAlert('success', "Thank you for your review! It has been submitted successfully.");
-        // Send notification to admin
+        // Send notification to admin (only via Firestore - notification-service.js will handle email)
         return db.collection("notifications").add({
           type: 'new_review',
-          data: {
-            ...reviewData,
-            user: {
-              name: currentUser.email.split('@')[0],
-              email: currentUser.email
-            }
-          },
+          data: reviewData,
           status: 'pending',
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -336,8 +284,7 @@ function initFormHandlers() {
       const formData = new FormData(bookingForm);
       const bookingData = Object.fromEntries(formData.entries());
       // Validation
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
       const checkinDate = new Date(bookingData.checkin);
       const checkoutDate = new Date(bookingData.checkout);
       if (!bookingData.name || !bookingData.guests || !bookingData.checkin || 
@@ -365,28 +312,6 @@ function initFormHandlers() {
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
       submitBtn.disabled = true;
-      // EmailJS Send
-      emailjs.send('Gonah Homes', 'template_p667wcm', {
-        from_name: bookingData.name,
-        from_email: bookingData.email,
-        message: `
-          Booking for: ${bookingData.house}
-          Name: ${bookingData.name}
-          Email: ${bookingData.email}
-          Phone: ${bookingData.phone}
-          Guests: ${bookingData.guests}
-          Check-in: ${bookingData.checkin}
-          Check-out: ${bookingData.checkout}
-          Accessibility: ${bookingData.access}
-          Special Requests: ${bookingData.requests}
-        `,
-        form_type: "Booking"
-      }, 'm0UJnizGPuMyIeNwi')
-        .then(() => {
-          showAlert('success', 'Your booking request email was sent successfully!');
-        }, (error) => {
-          showAlert('error', 'Failed to send booking request email.');
-        });
       // Save booking to database
       db.collection("bookings").add({
         ...bookingData,
@@ -394,7 +319,7 @@ function initFormHandlers() {
         status: 'pending'
       }).then(() => {
         showBookingConfirmation(bookingData);
-        // Send notification to admin
+        // Send notification to admin (only via Firestore - notification-service.js will handle email)
         return db.collection("notifications").add({
           type: 'new_booking',
           data: bookingData,
@@ -428,18 +353,6 @@ function initFormHandlers() {
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
       submitBtn.disabled = true;
-      // EmailJS Send
-      emailjs.send('Gonah Homes', 'template_p667wcm', {
-        from_name: name,
-        from_email: email,
-        message: message,
-        form_type: "Contact"
-      }, 'm0UJnizGPuMyIeNwi')
-        .then(() => {
-          showAlert('success', 'Your message was sent successfully!');
-        }, (error) => {
-          showAlert('error', 'Failed to send your message.');
-        });
       // Save message to database
       db.collection("messages").add({
         name: name,
@@ -450,7 +363,7 @@ function initFormHandlers() {
       }).then(() => {
         showAlert('success', "Thank you for your message! We will get back to you soon.");
         contactForm.reset();
-        // Send notification to admin
+        // Send notification to admin (only via Firestore - notification-service.js will handle email)
         return db.collection("notifications").add({
           type: 'new_message',
           data: {
@@ -511,15 +424,10 @@ function initSmoothScrolling() {
 
 // Intersection Observer for Animations
 function initAnimations() {
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
+  const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('fade-in');
-      }
+      if (entry.isIntersecting) entry.target.classList.add('fade-in');
     });
   }, observerOptions);
   document.querySelectorAll('.accommodation-card, .feature-card, .testimonial-card, .quick-link-card').forEach(el => {
@@ -527,24 +435,18 @@ function initAnimations() {
   });
 }
 
-// Close modal when clicking outside
+// Modal and Navbar handlers
 function initModalHandlers() {
   const modal = document.getElementById('booking-modal-bg');
   if (modal) {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeBookingModal();
-      }
+      if (e.target === modal) closeBookingModal();
     });
   }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeBookingModal();
-    }
+    if (e.key === 'Escape') closeBookingModal();
   });
 }
-
-// Navbar scroll effect
 function initNavbarScroll() {
   const navbar = document.querySelector('.main-header');
   if (navbar) {
@@ -577,28 +479,3 @@ document.addEventListener('DOMContentLoaded', () => {
   hideUserInfo();
   console.log('Gonah Homes website initialized successfully!');
 });
-
-// Custom Alert Function
-function showCustomAlert(message, type = "success") {
-  const existingAlert = document.querySelector('.custom-alert');
-  if (existingAlert) {
-    existingAlert.remove();
-  }
-  const alertBox = document.createElement('div');
-  alertBox.classList.add('custom-alert');
-  alertBox.classList.add(type);
-  const messageBox = document.createElement('p');
-  messageBox.textContent = message;
-  const closeBtn = document.createElement('span');
-  closeBtn.classList.add('alert-close-btn');
-  closeBtn.innerHTML = '&times;';
-  alertBox.appendChild(messageBox);
-  alertBox.appendChild(closeBtn);
-  document.body.appendChild(alertBox);
-  closeBtn.addEventListener('click', () => {
-    alertBox.remove();
-  });
-  setTimeout(() => {
-    alertBox.remove();
-  }, 5000);
-}
