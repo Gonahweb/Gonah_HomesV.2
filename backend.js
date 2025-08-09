@@ -5,7 +5,7 @@ class GonahHomesBackend {
   constructor() {
     this.db = firebase.firestore();
     this.auth = firebase.auth();
-    this.emailjsPublicKey = "z1Isb0xDLyKoaMoSKFw-q"; // <-- Use your correct key here!
+    this.emailjsPublicKey = "m0UJnizGPuMyIeNwi"; // <-- Use your correct key here!
     this.emailjsServiceId = "Gonah Homes";
     this.adminTemplateId = "template_68fd8qu";
     this.bookingConfirmationTemplateId = "template_p667wcm";
