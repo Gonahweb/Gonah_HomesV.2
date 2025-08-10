@@ -18,7 +18,7 @@ const adminEmail = "salimtuva0@gmail.com";
 
 // EmailJS Initialization (use your correct public key)
 (function () {
-  emailjs.init("z1Isb0xDLyKoaMoSKFw-q");
+  emailjs.init("kdP1XJxSxgjWRWYvW");
 })();
 
 // Utility Functions
@@ -258,7 +258,7 @@ function initFormHandlers() {
       db.collection("reviews").add(reviewData).then(() => {
         document.getElementById('review-text').value = '';
         document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
-        showAlert('success', "Thank you for your review! It has been submitted successfully.");
+        showAlert('success', "Your review has been submitted successfully.Thank you!");
         // Send notification to admin (only via Firestore - notification-service.js will handle email)
         return db.collection("notifications").add({
           type: 'new_review',
