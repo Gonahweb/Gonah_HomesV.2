@@ -54,9 +54,9 @@ class NotificationService {
     }
   }
 
-  // Send booking notification to admin only (template_68fd8qu)
+  // Send booking notification to admin only (template_p667wcm)
   async sendAdminBookingNotification(bookingData) {
-    await emailjs.send("Gonah Homes", "template_68fd8qu", {
+    await emailjs.send("Gonah Homes", "template_p667wcm", {
       from_name: bookingData.name,
       reply_to: bookingData.email,
       phone: bookingData.phone,
@@ -79,9 +79,9 @@ class NotificationService {
     });
   }
 
-  // Send new message notification to admin (template_68fd8qu)
+  // Send new message notification to admin (template_p667wcm)
   async sendAdminMessageNotification(messageData) {
-    await emailjs.send("Gonah Homes", "template_68fd8qu", {
+    await emailjs.send("Gonah Homes", "template_p667wcm", {
       from_name: messageData.name,
       reply_to: messageData.email,
       message: messageData.message,
@@ -96,9 +96,9 @@ class NotificationService {
     });
   }
 
-  // Send review notification to admin (template_68fd8qu)
+  // Send review notification to admin template_p667wcm)
   async sendAdminReviewNotification(reviewData) {
-    await emailjs.send("Gonah Homes", "template_68fd8qu", {
+    await emailjs.send("Gonah Homes", "template_p667wcm", {
       from_name: reviewData.user.name,
       reply_to: reviewData.user.email,
       rating: reviewData.rating,
@@ -132,8 +132,8 @@ class NotificationService {
     const reply = doc.data();
     const replyId = doc.id;
     try {
-      // Send reply to client (template_p667wcm)
-      await emailjs.send("Gonah Homes", "template_p667wcm", {
+      // Send reply to client (template_68fd8qu)
+      await emailjs.send("Gonah Homes", "template_68fd8qu", {
         to_email: reply.client_email,
         from_name: "Gonah Homes Admin",
         reply_message: reply.message,
