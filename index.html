@@ -545,6 +545,14 @@
             </div>
           </div>
 
+          <!-- Check-in Time -->
+          <div class="form-group">
+            <label for="booking-checkin-time">
+              <i class="fas fa-clock"></i> Preferred Check-In Time <span style="font-weight: normal; font-size: 0.95em;">(Optional)</span>
+            </label>
+            <input type="time" id="booking-checkin-time" name="checkin_time" placeholder="e.g. 14:00">
+          </div>
+
           <div class="form-group">
             <label for="booking-access">
               <i class="fas fa-wheelchair"></i> Accessibility Needs (Optional)
@@ -589,7 +597,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
   <!-- EmailJS SDK (consistent CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <!-- Site JS -->
