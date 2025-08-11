@@ -177,7 +177,7 @@
       color: #333;
       font-weight: bold;
     }
-    .form-group input {
+    .form-group input, .form-group textarea {
       width: 100%;
       padding: 0.8em;
       border: 1px solid #ddd;
@@ -185,7 +185,7 @@
       font-size: 1em;
       box-sizing: border-box;
     }
-    .form-group input:focus {
+    .form-group input:focus, .form-group textarea:focus {
       outline: none;
       border-color: #800000;
     }
@@ -528,7 +528,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
+  <!-- Notification Service -->
+  <script src="notification-service.js"></script>
   <script>
     // Firebase Configuration
     const firebaseConfig = {
@@ -553,8 +554,8 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Initialize EmailJS
-    emailjs.init("z1Isb0xDLyKoaMoSKFw-q");
+    // Use the correct EmailJS public key
+    emailjs.init("kdP1XJxSxgjWRWYvW");
 
     let currentAdmin = null;
     const ADMIN_EMAIL = 'salimtuva0@gmail.com';
@@ -766,278 +767,4 @@
       `;
     }
 
-    function loadBookings() {
-      db.collection('bookings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
-        const tbody = document.getElementById('bookings-tbody');
-        if (snapshot.empty) {
-          tbody.innerHTML = '<tr><td colspan="7">No bookings found.</td></tr>';
-          return;
-        }
-        let html = '';
-        snapshot.forEach((doc) => {
-          const booking = doc.data();
-          html += `
-            <tr>
-              <td>${booking.name || 'N/A'}</td>
-              <td>${booking.house || 'N/A'}</td>
-              <td>${booking.checkin || 'N/A'} - ${booking.checkout || 'N/A'}</td>
-              <td>${booking.guests || 'N/A'}</td>
-              <td>${booking.email || 'N/A'}<br>${booking.phone || 'N/A'}</td>
-              <td><span class="btn btn-warning">Pending</span></td>
-              <td>
-                <button class="btn btn-success" onclick="confirmBooking('${doc.id}')">Confirm</button>
-                <button class="btn btn-primary" onclick="contactClient('${booking.email}', '${booking.phone}')">Contact</button>
-              </td>
-            </tr>
-          `;
-        });
-        tbody.innerHTML = html;
-      });
-    }
-
-    function loadReviews() {
-      db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
-        const tbody = document.getElementById('reviews-tbody');
-        if (snapshot.empty) {
-          tbody.innerHTML = '<tr><td colspan="5">No reviews found.</td></tr>';
-          return;
-        }
-        let html = '';
-        snapshot.forEach((doc) => {
-          const review = doc.data();
-          const date = review.timestamp ? new Date(review.timestamp.toDate()).toLocaleDateString() : 'N/A';
-          html += `
-            <tr>
-              <td>${review.user?.name || 'Anonymous'}</td>
-              <td>${'★'.repeat(review.rating || 0)}</td>
-              <td>${review.review || 'N/A'}</td>
-              <td>${date}</td>
-              <td>
-                <button class="btn btn-primary" onclick="replyToReview('${doc.id}', '${review.user?.name || 'User'}')">Reply</button>
-                <button class="btn btn-danger" onclick="deleteReview('${doc.id}')">Delete</button>
-              </td>
-            </tr>
-          `;
-        });
-        tbody.innerHTML = html;
-      });
-    }
-
-    function loadMessages() {
-      db.collection('messages').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
-        const tbody = document.getElementById('messages-tbody');
-        if (snapshot.empty) {
-          tbody.innerHTML = '<tr><td colspan="6">No messages found.</td></tr>';
-          return;
-        }
-        let html = '';
-        snapshot.forEach((doc) => {
-          const message = doc.data();
-          const date = message.timestamp ? new Date(message.timestamp.toDate()).toLocaleDateString() : 'N/A';
-          const statusClass = message.status === 'new' ? 'btn-warning' : 'btn-success';
-          const statusText = message.status === 'new' ? 'New' : 'Read';
-          html += `
-            <tr>
-              <td>${message.name || 'N/A'}</td>
-              <td>${message.email || 'N/A'}</td>
-              <td>${(message.message || '').substring(0, 50)}${message.message && message.message.length > 50 ? '...' : ''}</td>
-              <td>${date}</td>
-              <td><span class="btn ${statusClass}">${statusText}</span></td>
-              <td>
-                <button class="btn btn-primary" onclick="viewMessage('${doc.id}', '${message.name}', '${message.email}', '${message.message}')">View</button>
-                <button class="btn btn-success" onclick="contactClient('${message.email}')">Reply</button>
-                ${message.status === 'new' ? `<button class="btn btn-warning" onclick="markAsRead('${doc.id}')">Mark Read</button>` : ''}
-              </td>
-            </tr>
-          `;
-        });
-        tbody.innerHTML = html;
-      });
-    }
-
-    function loadTrafficData() {
-      document.getElementById('page-views-today').textContent = '247';
-      document.getElementById('unique-visitors').textContent = '89';
-      document.getElementById('bounce-rate').textContent = '23%';
-    }
-
-    function loadOffers() {
-      const tbody = document.getElementById('offers-tbody');
-      tbody.innerHTML = '<tr><td colspan="5">No offers created yet.</td></tr>';
-    }
-
-    function loadClients() {
-      const tbody = document.getElementById('clients-tbody');
-      tbody.innerHTML = `
-        <tr>
-          <td>Jane Doe</td>
-          <td>jane@example.com</td>
-          <td>3</td>
-          <td>2 days ago</td>
-          <td>
-            <button class="btn btn-primary" onclick="contactClient('jane@example.com')">Contact</button>
-            <button class="btn btn-warning" onclick="viewClientHistory('client1')">History</button>
-          </td>
-        </tr>
-      `;
-    }
-
-    // --- EmailJS Helper for Admin Replies & Booking Confirmation ---
-    function sendEmailToClient(to_email, reply_text, context_type, booking_details = null) {
-      let params = {
-        to_email: to_email,
-        message: reply_text,
-        form_type: "Admin Reply (" + context_type + ")"
-      };
-      if (context_type === "Booking Confirmed" && booking_details) {
-        params.message = `Dear ${booking_details.name},\n\nYour booking for ${booking_details.house} from ${booking_details.checkin} to ${booking_details.checkout} has been confirmed!\n\nThank you for booking with Gonah Homes.\n\nBest regards,\nGonah Homes Team`;
-        params.from_name = "Gonah Homes Admin";
-        params.from_email = "gonahproperties@gmail.com";
-      }
-      emailjs.send('Gonah Homes', 'template_p667wcm', params, 'z1Isb0xDLyKoaMoSKFw-q')
-        .then(() => {
-          alert("Email sent to client!");
-        })
-        .catch((error) => {
-          alert("Failed to send email: " + error.text);
-        });
-    }
-
-    // --- Review Reply Submission ---
-    document.getElementById('reply-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const reviewId = document.getElementById('reply-review-id').value;
-      const replyText = document.getElementById('reply-text').value;
-      const reviewDoc = await db.collection('reviews').doc(reviewId).get();
-      const reviewData = reviewDoc.data();
-      const clientEmail = reviewData?.user?.email || "";
-      db.collection('reviews').doc(reviewId).update({
-        adminReply: replyText,
-        adminReplyAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        closeModal('reply-modal');
-        document.getElementById('reply-text').value = '';
-        alert('Reply saved successfully!');
-        if (clientEmail) {
-          sendEmailToClient(clientEmail, replyText, "Review");
-        }
-      });
-    });
-
-    // --- Message Reply Submission ---
-    document.getElementById('message-reply-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const messageId = document.getElementById('message-id').value;
-      const replyText = document.getElementById('message-reply-text').value;
-      const msgDoc = await db.collection('messages').doc(messageId).get();
-      const msgData = msgDoc.data();
-      const clientEmail = msgData?.email || "";
-      db.collection('messages').doc(messageId).update({
-        adminReply: replyText,
-        adminReplyAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        closeModal('message-modal');
-        document.getElementById('message-reply-text').value = '';
-        alert('Reply saved successfully!');
-        if (clientEmail) {
-          sendEmailToClient(clientEmail, replyText, "Message");
-        }
-      });
-    });
-
-    // --- Booking Confirmation Button Logic (Send Email) ---
-    async function confirmBooking(bookingId) {
-      if (confirm('Confirm this booking?')) {
-        const bookingDoc = await db.collection('bookings').doc(bookingId).get();
-        const bookingData = bookingDoc.data();
-        db.collection('bookings').doc(bookingId).update({
-          status: 'confirmed',
-          confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-          alert('Booking confirmed successfully!');
-          if (bookingData.email) {
-            sendEmailToClient(bookingData.email, "", "Booking Confirmed", bookingData);
-          }
-        });
-      }
-    }
-
-    function replyToReview(reviewId, userName) {
-      document.getElementById('reply-review-id').value = reviewId;
-      document.getElementById('reply-modal').style.display = 'block';
-    }
-
-    function deleteReview(reviewId) {
-      if (confirm('Delete this review?')) {
-        db.collection('reviews').doc(reviewId).delete().then(() => {
-          alert('Review deleted successfully!');
-        });
-      }
-    }
-
-    function contactClient(email, phone = null) {
-      const contactMethod = phone ? 
-        confirm(`Contact ${email}?\nOK = Email\nCancel = WhatsApp (${phone})`) : true;
-      if (contactMethod) {
-        window.open(`mailto:${email}?subject=Gonah Homes - Follow Up&body=Dear Customer,%0D%0A%0D%0AThank you for choosing Gonah Homes. We are reaching out regarding your inquiry.%0D%0A%0D%0ABest regards,%0D%0AGonah Homes Team`);
-      } else if (phone) {
-        const message = encodeURIComponent("Hello! Thank you for choosing Gonah Homes. We are reaching out regarding your inquiry.");
-        window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`);
-      }
-    }
-
-    function replyToMessage(messageId) {
-      document.getElementById('message-id').value = messageId;
-      document.getElementById('message-modal').style.display = 'block';
-    }
-
-    function createOffer() {
-      const title = prompt('Offer Title:');
-      const description = prompt('Offer Description:');
-      if (title && description) {
-        db.collection('offers').add({
-          title: title,
-          description: description,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          status: 'active'
-        }).then(() => {
-          alert('Offer created successfully!');
-          loadOffers();
-        });
-      }
-    }
-
-    function viewMessage(messageId, name, email, message) {
-      document.getElementById('message-details').innerHTML = `
-        <p><strong>From:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong></p>
-        <div style="background: #f5f5f5; padding: 1rem; border-radius: 5px; margin: 0.5rem 0;">
-          ${message}
-        </div>
-      `;
-      document.getElementById('message-id').value = messageId;
-      document.getElementById('message-modal').style.display = 'block';
-    }
-
-    function markAsRead(messageId) {
-      db.collection('messages').doc(messageId).update({
-        status: 'read',
-        readAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {});
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
-    }
-
-    document.getElementById('settings-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('Settings saved successfully!');
-    });
-
-    loadDashboardData();
-  </script>
-  <script src="notification-service.js"></script>
-</body>
-</html>
+    // --- Improved Bookings Table
