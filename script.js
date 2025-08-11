@@ -252,20 +252,14 @@ function initFormHandlers() {
           name: currentUser.email.split('@')[0],
           email: currentUser.email
         },
-        adminReply: null
+        adminReply: null,
+        status: 'pending'
       };
       // Save review to database
       db.collection("reviews").add(reviewData).then(() => {
         document.getElementById('review-text').value = '';
         document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
         showAlert('success', "Your review has been submitted successfully.Thank you!");
-        // Send notification to admin (only via Firestore - notification-service.js will handle email)
-        return db.collection("notifications").add({
-          type: 'new_review',
-          data: reviewData,
-          status: 'pending',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
       }).catch((error) => {
         console.error("Error adding review: ", error);
         showAlert('error', "Error submitting review. Please try again.");
@@ -312,6 +306,12 @@ function initFormHandlers() {
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
       submitBtn.disabled = true;
+
+      // Add check-in time (if present in form)
+      if (document.getElementById('booking-checkin-time')) {
+        bookingData.checkin_time = document.getElementById('booking-checkin-time').value || "";
+      }
+
       // Save booking to database
       db.collection("bookings").add({
         ...bookingData,
@@ -319,13 +319,6 @@ function initFormHandlers() {
         status: 'pending'
       }).then(() => {
         showBookingConfirmation(bookingData);
-        // Send notification to admin (only via Firestore - notification-service.js will handle email)
-        return db.collection("notifications").add({
-          type: 'new_booking',
-          data: bookingData,
-          status: 'pending',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
       }).catch((error) => {
         console.error("Error saving booking: ", error);
         showAlert('error', "Error processing booking. Please try again.");
@@ -359,21 +352,10 @@ function initFormHandlers() {
         email: email,
         message: message,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'new'
+        status: 'pending'
       }).then(() => {
         showAlert('success', "Thank you for your message! We will get back to you soon.");
         contactForm.reset();
-        // Send notification to admin (only via Firestore - notification-service.js will handle email)
-        return db.collection("notifications").add({
-          type: 'new_message',
-          data: {
-            name: name,
-            email: email,
-            message: message
-          },
-          status: 'pending',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
       }).catch((error) => {
         console.error("Error sending message: ", error);
         showAlert('error', "Error sending message. Please try again.");
@@ -398,7 +380,8 @@ function showBookingConfirmation(bookingData) {
       <p><strong>Email:</strong> ${bookingData.email}</p>
       <p><strong>Phone:</strong> ${bookingData.phone}</p>
       <p><strong>Number of Guests:</strong> ${bookingData.guests}</p>
-      <p><strong>Check-in:</strong> ${formatDate(bookingData.checkin)}</p>
+      <p><strong>Check-in:</strong> ${formatDate(bookingData.checkin)}
+      ${bookingData.checkin_time ? `, <strong>Time:</strong> ${bookingData.checkin_time}` : ''}</p>
       <p><strong>Check-out:</strong> ${formatDate(bookingData.checkout)}</p>
       ${bookingData.access ? `<p><strong>Accessibility Needs:</strong> ${bookingData.access}</p>` : ''}
       ${bookingData.requests ? `<p><strong>Special Requests:</strong> ${bookingData.requests}</p>` : ''}
